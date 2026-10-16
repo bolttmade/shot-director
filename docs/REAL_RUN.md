@@ -1,6 +1,6 @@
 # The real run: what was actually done
 
-Short record of how the real clips in `examples/real/` were made (two from Comfy Cloud's web UI, two from the Router API), so nobody has to guess. Nothing here is a plan that has not happened, except the last section.
+Short record of how the real clips in `examples/real/` were made (two from Comfy Cloud's web UI, twelve image-to-video clips from three partner models via the Router API, plus six FLUX 3 coverage stills), so nobody has to guess. Nothing here is a plan that has not happened, except the last section. The full credit log is in [COSTS.md](COSTS.md); what ran as a graph is in [PROCESS.md](PROCESS.md).
 
 ## What was run
 
@@ -20,7 +20,7 @@ Short record of how the real clips in `examples/real/` were made (two from Comfy
 | `alley__dolly-in.mp4` | `dolly-in` | slow level forward dolly down the alley | Smooth forward dolly with some background warping. Own rating 5/10. | Yes, green badge |
 | `alley__crane-up.mp4` | `crane-up` | slow crane move upward revealing the alley | **Partial:** it rises, but also pushes forward and the scooter flattens. Own rating 5/10. | Yes, green badge **plus** "partial: rises but also pushes forward" |
 | `alley__dolly-in__router-grok-imagine-1-5-lite.mp4` | `dolly-in` | short preset prompt: the camera dollies in smoothly (Router, Grok Imagine 1.5 lite, 5 s @ 480p; see Run 4 below) | Smooth push-in, some invented detail at the end. Own rating 6/10. | Gallery only, own green badge |
-| `alley__crane-up__router-grok-imagine-1-5-lite-720p.mp4` | `crane-up` | the preset's own prompt: a sweeping crane shot, the camera rises high and steadily while pushing forward, tilting down (Router, Grok Imagine 1.5 lite, 5 s @ 720p; see Run 5 below) | **Clean crane.** Rises, pushes forward and tilts down; scooter sinks out of the bottom; walls and windows invented. Own rating 7/10. **The hero clip.** | Gallery only, own green badge |
+| `alley__crane-up__router-grok-imagine-1-5-lite-720p.mp4` | `crane-up` | the preset's own prompt: a sweeping crane shot, the camera rises high and steadily while pushing forward, tilting down (Router, Grok Imagine 1.5 lite, 5 s @ 720p; see Run 5 below) | **Clean crane.** Rises, pushes forward and tilts down; scooter sinks out of the bottom; walls and windows invented. Own rating 7/10. (Was the hero until the MiniMax H3 batch below produced better clips.) | Gallery only, own green badge |
 | orbit-left (not in the repo as a clip) | `orbit-left` | slow orbit left around the scooter | **Did not orbit.** Own rating 4/10. | **No.** Not imported, not shown anywhere. Only its workflow is kept in `workflows/real/` for the record |
 
 One earlier pilot render was discarded and is not used anywhere.
@@ -51,6 +51,31 @@ Takeaway, stated plainly: with a prompt alone, LTX-2.3 follows a plain dolly rea
 - **Not run:** a second generation. The first result was clean enough, so no second request was made and no credits were spent on one. No other model was tried.
 - **In the app:** a gallery-only variant (`alley__crane-up__router-grok-imagine-1-5-lite-720p.mp4`) with its own green badge. In Demo mode, Crane Up on the alley still keeps replaying the LTX-2.3 clip; the hero is opened from the gallery.
 
+## Router batch (2026-10-16, real, via API): the "one real render" set
+
+Goal: show the app's pitch, **free previs, then one real render**, with real clips on four different stills and several camera moves. The account's existing Comfy credits were used (no card, no top-up). Every request below was made by `scripts/smoke_real.py` (video) or `scripts/router_still.py` / `scripts/router_coverage.py` (FLUX 3 Image): the cap was set per run, the balance was read before and after, one submit per attempt, no retries, no failed Router call, no 402. All clips are image-to-video from the still named in the file, **prompt-only (the preset's own prompt plus a one-sentence scene), not open weights, not LTX, not camera-LoRA, unedited** (the importer strips metadata and re-encodes the 1344x768 MiniMax files to 1280 wide).
+
+**Input stills.** `forest-cabin`, `retro-diner` and `coast-lighthouse` were generated with FLUX 3 Image (`bfl/flux-3-image`, text-to-image, 14.48 credits each); `alley` was already there. No people, text or logos were requested.
+
+| Clip (`examples/real/`) | Model | Credits | Own rating | Honest verdict |
+|---|---|---|---|---|
+| `forest-cabin__fpv-drone__router-minimax-h3` | MiniMax H3 768P | 135.78 | **8/10, the hero** | Fast FPV swoop past the cabin and into the pines, real motion blur; leaves the still's framing entirely and the end of the forest is invented |
+| `forest-cabin__dolly-in__router-minimax-h3` | MiniMax H3 | 135.78 | **8/10** | Cleanest move of the set: steady push to the cabin, rays and smoke coherent, slight fern drift |
+| `alley__crane-up__router-minimax-h3` | MiniMax H3 | 135.78 | 7/10 | Clean crane, like the Grok one but with slightly more natural steam parallax; revealed walls invented |
+| `coast-lighthouse__orbit-right__router-minimax-h3` | MiniMax H3 | 135.78 | 7/10 | A lateral parallax arc, not a true orbit: the far side of the lighthouse never shows |
+| `retro-diner__dolly-right__router-minimax-h3` | MiniMax H3 | 135.78 | 7/10 | Real parallax track along the booths; invented kitchen; drifts forward as well |
+| `alley__orbit-left__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 7/10 | **The orbit that LTX-2.3 prompt-only could not do** (that run was 4/10); the scooter shifts shape a little |
+| `coast-lighthouse__jib-up__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 7/10 | Rises and tilts down; re-imagines the foreground grass as rock |
+| `retro-diner__dolly-in__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 7/10 | Clean push down the diner; booth detail softens |
+| `forest-cabin__push-in-rack__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 6/10 | Push-in works; **the requested rack focus is not visible** |
+| `retro-diner__arc__router-flux-3-video` | FLUX 3 Video hd | 226.3 | **4/10** | Beautiful and stable, but the arc barely happens. The most expensive clip is the weakest mover; kept as an honest data point and for the FLUX 3 bonus |
+
+**What this says.** MiniMax H3 at 136 credits follows camera instructions best; by my ratings Grok lite at 48 credits (6-7/10) is within a point or two of H3 (7-8/10) for about a third of the price (and is where to start; this is one sample per move, not a benchmark); FLUX 3 Video is the prettiest and least obedient. Two earlier Grok clips (`alley` dolly-in 480p, 6/10; `alley` crane-up 720p, 7/10) sit alongside them. The takeaway for the tool: previs the move for free, render only the move you picked, and choose the model by what it obeys, not by price.
+
+**Coverage (FLUX 3 Image, 6 requests, 86.9 credits).** `examples/real/coverage/alley/`: wide, medium, close, low, high and profile re-shoots of the alley still via image edits with natural-language camera prompts (`app/angles.py:natural_prompt`), unedited. Own rating 7/10: six coherent angles; the close-up and high angle are best, wide and medium are close to each other, and the low and profile shots re-imagine parts of the alley. The close-up shows a small garbled emblem and lettering on the scooter body (generated, not a real logo; unreadable). The Demo engine replays the six stills with a green badge on the alley.
+
+**Things that broke on the way (all fixed, none cost an extra request).** BFL fields want raw base64 or a URL, not a `data:` URL (fixed before the first FLUX run was submitted: `raw_base64`); the H3 importer first recorded the pre-rescale resolution (re-imported with `--force`); the static price table under-reported Grok by 7% and over-estimated FLUX 3 Video by 12% (both now carry the measured rates); on one H3 run the balance read straight after the run was stale (see COSTS.md).
+
 ## How they get into the app
 
 ```bash
@@ -64,7 +89,7 @@ cp alley__dolly-in.mp4 alley__dolly-in.json examples/real/     # .json = notes (
 
 | | Real | Simulated |
 |---|---|---|
-| Made by | LTX-2.3 on Comfy Cloud, or Grok Imagine 1.5 lite via the Comfy Router | `app/vcam.py` (depth-parallax virtual camera over a still) |
+| Made by | LTX-2.3 on Comfy Cloud, or MiniMax H3 / Grok Imagine 1.5 lite / FLUX 3 Video / FLUX 3 Image via the Comfy Router | `app/vcam.py` (depth-parallax virtual camera over a still) |
 | Where | `examples/real/` | `examples/outputs/`, `examples/presets/` |
 | Badge | green | amber |
 | May be called "model output" | yes | **never** |
@@ -75,6 +100,6 @@ One free run is left and is being held. If it is used, it needs:
 
 1. Same template, same input `alley.jpg`, settings left at defaults (so it is comparable).
 2. Decide the goal first. A re-try of `orbit-left` with a different prompt is the only one that would change the story; do not expect a prompt alone to fix it.
-3. Before pressing Run: check there is no price, "Upgrade" or credits prompt. If there is, stop. The Cloud web runs cost no credits. The only credits spent so far are the ~30-33 (dolly-in) and ~48 (crane-up) of the two Router runs above; never add a card, subscribe or spend further credits without the owner's approval.
+3. Before pressing Run: check there is no price, "Upgrade" or credits prompt. If there is, stop. The Cloud web runs cost no credits. Router credits spent are listed in COSTS.md; never add a card, subscribe or spend further credits without the owner's approval.
 4. Save the video as `alley__<preset-id>.mp4` and write a notes JSON from `examples/real/_notes.example.json` with the **exact** prompt and an honest verdict; export the workflow (Comfy icon → File → **Export**) into `workflows/real/`; then run `scripts/import_real.py`.
 5. If the result is bad, keep it out of the gallery (it can stay in `workflows/real/` as a documented failure).

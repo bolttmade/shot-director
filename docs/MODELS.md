@@ -37,7 +37,7 @@ Prompt grammar: `<sks> <azimuth> <elevation> <distance>`, for example `<sks> fro
 
 ## Router engine (`router`): partner models, credits
 
-`minimax/minimax-h3` (default), `byteplus/dreamina-seedance-2-5-260628`, `xai/grok-imagine-video-1.5-lite`, `bfl/flux-3-image` (stills). These are hosted partner models: **not** eligible for the Open Weights Only category. `ltx/ltx-2-5-*` on Router accepts text only, so it is never used for image-to-video.
+`minimax/minimax-h3` (default), `byteplus/dreamina-seedance-2-5-260628`, `xai/grok-imagine-video-1.5-lite`, `bfl/flux-3-image` (stills, angle edits, coverage), `bfl/flux-3-video` (image-to-video, 5 s minimum). **Run live on 2026-10-16:** MiniMax H3, Grok lite, FLUX 3 Image (text-to-image and edits) and FLUX 3 Video; Seedance 2.5 and LTX via Router were not run. See [COSTS.md](COSTS.md) and [REAL_RUN.md](REAL_RUN.md). These are hosted partner models: **not** eligible for the Open Weights Only category. `ltx/ltx-2-5-*` on Router accepts text only, so it is never used for image-to-video.
 
 ## Demo engine
 

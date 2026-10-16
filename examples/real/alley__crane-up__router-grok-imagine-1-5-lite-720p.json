@@ -22,5 +22,6 @@
   "credits_used": 48.27,
   "credits_note": "Balance read BEFORE the run: 984.27 USD cents; AFTER: 961.39 (GET api.comfy.org/customers/balance, read-only), a 22.88-cent difference = about 48.3 credits at 211/USD. The app's static-table ESTIMATE was 45.26 credits (Router /estimate is not enabled for this workspace), so the table under-reports by about 7%.",
   "router_request_id": "01e36596-d4d5-47dd-91bc-7bac11f57373",
-  "notes": "Comfy Router, one request via scripts/smoke_real.py --preset crane-up --duration 5 --resolution 720p. Unedited; the importer only strips container metadata. Hero clip of the demo."
+  "notes": "Comfy Router, one request via scripts/smoke_real.py --preset crane-up --duration 5 --resolution 720p. Unedited; the importer only strips container metadata. Hero clip of the demo.",
+  "rating": 7.0
 }

@@ -1,7 +1,7 @@
 {
   "schema": "shot-director/recipe@1",
   "app_version": "0.1.0",
-  "created": "2026-10-16T19:11:03+00:00",
+  "created": "2026-10-16T20:20:53+00:00",
   "kind": "shot",
   "engine": "router",
   "model": "xai/grok-imagine-video-1.5-lite (Comfy Router, partner model)",
@@ -55,13 +55,14 @@
     "credits_used": 30.17,
     "credits_note": "30.17 is the app's static-table ESTIMATE (Router /estimate returned not_enabled), which the app records as credits_used. The account balance read after the run (GET api.comfy.org/customers/balance) was 984.27 (USD cents), i.e. 15.73 cents (~33.2 credits at 211/USD) below a presumed 1000 cents before; that prior balance was NOT read, so the true charge is unverified (about 30-33 credits).",
     "router_request_id": "f98c1931-c864-4678-9671-60d4f9d9df48",
-    "notes": "Comfy Router, one request via scripts/smoke_real.py --duration 5. Unedited; the importer only strips container metadata."
+    "notes": "Comfy Router, one request via scripts/smoke_real.py --duration 5. Unedited; the importer only strips container metadata.",
+    "rating": 6.0
   },
   "run_date": "2026-10-16",
   "output_sha256": "cae8d186779b95310d802f8a0bce35146899aaa407866bcf9a8138520c6ad1fc",
-  "original_sha256": "50a7c9a9bbbef9471e810692e3c30cc8d2688e43274cf2e2ec53e476dc187f8c",
+  "original_sha256": "cae8d186779b95310d802f8a0bce35146899aaa407866bcf9a8138520c6ad1fc",
   "transcoded": false,
   "metadata_stripped": true,
   "transcode_crf": null,
-  "imported": "2026-10-16T19:11:03+00:00"
+  "imported": "2026-10-16T20:20:53+00:00"
 }
