@@ -104,7 +104,7 @@ function loadTex(unit, image) {
   for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
   return t;
 }
-const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("could not load " + src)); i.src = src; });
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => res(i); i.onerror = () => rej(new Error("could not load " + src)); i.src = src; });
 async function glLoadInput(inp) {
   if (GL.key === inp.id) return;
   const [img, dep] = await Promise.all([loadImg(inp.still), loadImg(inp.depth)]);

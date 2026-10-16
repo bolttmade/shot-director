@@ -86,3 +86,9 @@ def test_clips_are_small_silent_720p(built):
         assert [s["codec_type"] for s in info] == ["video"]          # no audio track
         assert info[0]["width"] <= 1280 and info[0]["codec_name"] == "h264"
         assert f.stat().st_size < 3_000_000
+
+
+def test_images_are_loaded_with_cors_so_the_webgl_previs_works_behind_the_hf_cdn_redirect():
+    # Hugging Face serves media via a 302 to a CDN: without crossOrigin the canvas texture upload is blocked (black previs).
+    js = (ROOT / "static_site" / "app.js").read_text()
+    assert 'crossOrigin = "anonymous"' in js
