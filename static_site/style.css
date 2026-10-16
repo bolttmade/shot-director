@@ -12,6 +12,11 @@ main{max-width:1240px;margin:0 auto;padding:16px 18px 40px}
 .honest{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:10px;padding:10px 14px;margin:0 0 14px;color:#cdd2e0}
 .b{font:700 11px var(--mono);padding:3px 8px;border-radius:6px;letter-spacing:.02em;display:inline-block}
 .b.sim{background:var(--amber);color:#1b1306}.b.real{background:var(--green);color:#04231a}
+/* the provenance popup on the stage: dark box, light text, coloured edge (amber = simulated, green = real) */
+.stage-h .b{font:500 13px/1.4 var(--mono);color:#eef2fa;background:#0c1018;border:1px solid #2b3347;border-left:6px solid var(--amber);padding:8px 12px;border-radius:8px;letter-spacing:.01em;display:block;flex:1 1 100%}
+.stage-h .b.real{border-left-color:var(--green)}
+.b .bh{display:block;font:800 14px/1.35 var(--mono);color:var(--amber);margin-bottom:2px}.b .bn{display:block;color:#cfd6e4}
+.stage-h .b.real .bh{color:#5eead4}
 .grid{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:14px;margin-bottom:14px}
 @media(max-width:860px){.grid{grid-template-columns:1fr}}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}

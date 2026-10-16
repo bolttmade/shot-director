@@ -123,11 +123,13 @@ function glDraw(c) {
 
 /* ------------------------------------------------------------------ UI */
 function realFor(inp, pre) { return S.data.clips.filter(c => c.input === inp && c.preset === pre).sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1))[0]; }
-function setBadge(kind, text) {
+function setBadge(kind, text, head) {
   const b = $("#badge");
   if (!kind) { b.className = "b hidden"; return; }
-  b.className = "b " + kind; b.textContent = text;
+  b.className = "b " + kind; b.replaceChildren(h("span", { class: "bh" }, head || (kind === "real" ? "REAL" : "SIMULATED")), h("span", { class: "bn" }, text));
 }
+// the facts of the clip that is on the stage, built from that clip's own data
+function clipFacts(c) { return `REAL · ${c.model_label} · ${c.preset_name} on ${c.input_title} · own rating ${c.rating ?? "n/a"}/10 · ${c.credits_used ? (c.credits_label || fmtCr(c.credits_used)) + " credits" : "free tier"}`; }
 function showCanvas() { $("#vid").pause(); $("#vid").classList.add("hidden"); $("#gl").classList.remove("hidden"); }
 function showVideo(src) { const v = $("#vid"); $("#gl").classList.add("hidden"); v.classList.remove("hidden"); v.src = src; v.muted = true; v.play().catch(() => {}); }
 function infoReal(c) {
@@ -169,7 +171,7 @@ function previs() {
   if (!S.preset || !S.glOk) return;
   cancelAnimationFrame(S.raf); showCanvas();
   const spec = S.preset.virtual_camera, dur = 4000, t0 = performance.now();
-  setBadge("sim", "Simulated previs: in-browser depth-parallax camera, not model output");
+  setBadge("sim", "Simulated previs: in-browser depth-parallax camera, not model output", "SIMULATED");
   const tick = now => { const t = Math.min((now - t0) / dur, 1); glDraw(camAt(spec, t)); if (t < 1) S.raf = requestAnimationFrame(tick); };
   S.raf = requestAnimationFrame(tick);
   const real = realFor(S.input.id, S.preset.id), box = $("#info");
@@ -178,7 +180,7 @@ function previs() {
     real ? h("div", { class: "callout" }, `A real render of this exact still and move exists: ${real.model_label} via ${real.platform}, ${real.credits_used ? (real.credits_label || fmtCr(real.credits_used)) + " credits" : "free tier"}, own rating ${real.rating ?? "n/a"}/10. Press "Play the real render".`) : h("div", { class: "callout" }, "No real render of this still + move is committed. See the gallery below for the real clips, or run it yourself (section 5)."));
 }
 function playReal(c) {
-  cancelAnimationFrame(S.raf); showVideo(c.file); setBadge("real", c.badge || `Real ${c.model_label} output via ${c.platform}`);
+  cancelAnimationFrame(S.raf); showVideo(c.file); setBadge("real", c.badge || `Real ${c.model_label} output via ${c.platform}`, clipFacts(c));
   $("#stageTitle").textContent = `${c.preset_name} · ${c.input_title} · real render`; infoReal(c);
   $("#stage")?.scrollIntoView?.({ block: "nearest" });
 }
@@ -259,7 +261,7 @@ async function runReal() {
     const res = await comfyFetch(`/v2/models/${m.id}/requests/${id}`);
     const url = findUrl(res.body); if (!url) throw new Error(`Completed, but no video URL was found in the result. Request id ${id}.`);
     const used = res.headers.get("X-Comfy-Credits-Used");
-    cancelAnimationFrame(S.raf); showVideo(url); setBadge("real", `Real ${m.label} output via Comfy Router (your own run, unedited)`);
+    cancelAnimationFrame(S.raf); showVideo(url); setBadge("real", `Real ${m.label} output via Comfy Router (your own run, unedited)`, "REAL · your own run");
     $("#stageTitle").textContent = `${S.preset.name} · ${S.input.title} · your render`;
     say(`Done. Request id ${id}${used ? ", credits used " + used : ", estimated " + credits.toFixed(1) + " credits"}. The result link expires in about 12-24 h: save the video now.`);
     out.append(h("p", {}, h("a", { href: url, target: "_blank", rel: "noopener" }, "Open the video file")));

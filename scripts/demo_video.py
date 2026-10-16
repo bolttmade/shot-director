@@ -42,7 +42,7 @@ FONT_M = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 
 # kind: clip (real clip full frame) | card | ui:<capture name>.  `label` is burned in as a green/amber tag where the footage has no UI badge.
 BEATS = [
-    {"id": "hero", "kind": "clip", "src": "examples/real/forest-cabin__fpv-drone__router-minimax-h3.mp4", "label": ("real", "REAL · MiniMax H3 via Comfy Router · one still in, 135.78 credits · unedited"),
+    {"id": "hero", "kind": "clip", "src": "examples/real/forest-cabin__fpv-drone__router-minimax-h3.mp4", "label": ("real", "REAL · MiniMax H3 via Comfy Router · FPV Drone on Forest Cabin · own rating 7/10 · 135.78 credits · unedited"),
      "text": "One still. One real render. This is Shot Director."},
     {"id": "concept", "kind": "card", "card": "concept",
      "text": "Shot Director is a camera-move studio for Comfy. Preview any move for free with a simulated camera, then spend credits once, on the real render of the move you picked."},
@@ -128,38 +128,36 @@ def make_cards(work: Path) -> None:
     d.text((56, 505), "Green = real model output.   Amber = simulated.   Nothing is relabelled.", font=_font(FONT_B, 24), fill=TXT)
     im.save(work / "card_concept.png")
 
-    # platform / build
+    # platform / build: four big facts, nothing else
     n = _test_count()
     im, d = canvas(); head(d, "Built on the Comfy platform")
-    rows = [(CY, "Comfy Router API", "minimax/minimax-h3 · xai/grok-imagine-video-1.5-lite · bfl/flux-3-image · bfl/flux-3-video"),
-            (CY, "Comfy SDK 0.5.0", "client.models.submit → handle.iter_events() → handle.get(): one submit, never retried"),
-            (AMB, "Comfy Cloud", "LTX-2.3 image-to-video template on the free tier (2 prompt-only clips)"),
-            (GRN, "Cost guard", "price first (static table: /estimate not enabled), cap, explicit confirm, 402 stops"),
-            (GRN, "Quality", f"{n} tests · CI green on Python 3.10, 3.11, 3.12 · secret and real-name scans")]
-    y = 150
-    for col, t, s in rows:
-        d.rounded_rectangle((56, y, 1224, y + 84), 14, fill=PANEL, outline=LINE, width=2)
-        d.rectangle((56, y + 10, 62, y + 74), fill=col)
-        d.text((84, y + 10), t, font=_font(FONT_B, 25), fill=col)
-        d.text((84, y + 46), s, font=_font(FONT, 18), fill=TXT)
-        y += 98
+    tiles = [(CY, "14 real clips", ["+ 6 coverage stills,", "all unedited"]),
+             (CY, "4 Router models", ["MiniMax H3 · Grok Imagine lite", "FLUX 3 Image · FLUX 3 Video"]),
+             (GRN, (f"{int(n) // 10 * 10}+" if n.isdigit() else n) + " tests · CI green", ["Comfy SDK 0.5.0", "Python 3.10, 3.11, 3.12"]),
+             (AMB, "Cap + confirm", ["price first, one submit,", "never retried, stops on 402"])]
+    for i, (col, big, lines) in enumerate(tiles):
+        x0, y0 = 56 + (i % 2) * 596, 150 + (i // 2) * 232
+        d.rounded_rectangle((x0, y0, x0 + 572, y0 + 212), 18, fill=PANEL, outline=col, width=4)
+        d.text((x0 + 28, y0 + 26), big, font=_font(FONT_B, 44), fill=col)
+        for j, ln in enumerate(lines):
+            d.text((x0 + 28, y0 + 104 + j * 42), ln, font=_font(FONT, 30), fill=TXT)
     im.save(work / "card_platform.png")
 
-    # credit log
-    im, d = canvas(); head(d, "The credit log", "Router spend, 2026-10-16 · 211 credits per US dollar · measured by balance delta")
-    rows = [("5 × MiniMax H3 clips (5 s, 768P)", "135.78 each", "679"), ("6 × Grok Imagine 1.5 lite clips (5 s)", "33 to 48 each", "275"),
-            ("1 × FLUX 3 Video clip (5 s, hd)", "226.3", "226"), ("3 stills + 6 coverage edits (FLUX 3 Image)", "14.48 each", "130")]
-    y = 178
-    for a, b, c in rows:
-        d.rounded_rectangle((56, y, 1224, y + 62), 12, fill=PANEL, outline=LINE, width=2)
-        d.text((78, y + 16), a, font=_font(FONT, 24), fill=TXT)
-        d.text((800, y + 18), b, font=_font(FONT, 20), fill=MUT)
-        d.text((1124, y + 14), c, font=_font(FONT_B, 28), fill=GRN)
-        y += 72
-    d.rounded_rectangle((56, y + 8, 1224, y + 84), 12, fill=PANEL, outline=AMB, width=3)
-    d.text((78, y + 28), "About 1,310 credits (about $6.2) · every request id in docs/COSTS.md", font=_font(FONT_B, 24), fill=AMB)
-    d.text((56, y + 104), "Estimate vs measured is logged for every run: H3 exact, Grok +7%, FLUX 3 Video −12%.", font=_font(FONT, 19), fill=MUT)
-    d.text((56, y + 134), "No card charge. No retries. No 402.", font=_font(FONT, 19), fill=MUT)
+    # credit log: only the key numbers
+    im, d = canvas(); head(d, "Credits spent: about 1,310 (~$6.2)")
+    rows = [("MiniMax H3 · 5 clips", "135.78 credits each", "679"),
+            ("Grok Imagine lite · 6 clips", "~33 to 48 credits each, depending on resolution", "275"),
+            ("FLUX 3 Video · 1 clip", "226.3 credits", "226"),
+            ("FLUX 3 Image · 3 stills + 6 coverage edits", "14.48 credits each", "130")]
+    y = 142
+    for a_, b_, c_ in rows:
+        d.rounded_rectangle((56, y, 1224, y + 84), 14, fill=PANEL, outline=LINE, width=2)
+        d.text((80, y + 8), a_, font=_font(FONT_B, 34), fill=TXT)
+        d.text((80, y + 50), b_, font=_font(FONT, 24), fill=MUT)
+        d.text((1196 - d.textlength(c_, font=_font(FONT_B, 52)), y + 14), c_, font=_font(FONT_B, 52), fill=GRN)
+        y += 94
+    d.rounded_rectangle((56, y + 6, 1224, y + 96), 14, fill=PANEL, outline=AMB, width=4)
+    d.text((80, y + 24), "Every request id is logged in docs/COSTS.md", font=_font(FONT_B, 34), fill=AMB)
     im.save(work / "card_credits.png")
 
     # end
@@ -191,62 +189,50 @@ def make_tts(work: Path) -> None:
 
 
 # ----------------------------------------------------------------------------------------------------- capture
-class Recorder:
-    """CDP screencast -> jpeg frames with timestamps. pause()/resume() drop frames (to cut dead waiting time out)."""
-
-    def __init__(self, page, ctx, outdir: Path):
-        self.dir, self.n, self.frames, self.paused = outdir, 0, [], False
-        shutil.rmtree(outdir, ignore_errors=True); outdir.mkdir(parents=True)
-        self.cdp = ctx.new_cdp_session(page)
-        self.cdp.on("Page.screencastFrame", self._on)
-        self.cdp.send("Page.startScreencast", {"format": "jpeg", "quality": 88, "maxWidth": W, "maxHeight": UI_H, "everyNthFrame": 1})
-        self.t_shift, self.last_ts, self.resume_pending = 0.0, None, False
-
-    def _on(self, e):
-        self.cdp.send("Page.screencastFrameAck", {"sessionId": e["sessionId"]})
-        ts = e["metadata"]["timestamp"]
-        if self.paused:
-            return
-        if self.resume_pending and self.last_ts is not None:
-            self.t_shift += ts - self.last_ts - 0.04   # close the gap that was paused away
-        self.resume_pending = False
-        self.last_ts = ts
-        p = self.dir / f"f{self.n:06d}.jpg"; p.write_bytes(base64.b64decode(e["data"]))
-        self.frames.append((ts - self.t_shift, p.name)); self.n += 1
-
-    def pause(self):
-        self.paused = True
-
-    def resume(self):
-        self.paused = False; self.resume_pending = True
-
-    def stop(self, tail: float = 0.6) -> Path:
-        self.cdp.send("Page.stopScreencast")
-        lst = self.dir / "list.txt"
-        with lst.open("w") as f:
-            for (t0, name), nxt in zip(self.frames, self.frames[1:] + [(self.frames[-1][0] + tail, "")]):
-                f.write(f"file '{name}'\nduration {max(nxt[0] - t0, 0.001):.4f}\n")
-            f.write(f"file '{self.frames[-1][1]}'\n")
-        mp4 = self.dir.with_suffix(".mp4")
-        run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-vf", f"fps={FPS},scale={W}:{UI_H}:flags=lanczos,format=yuv420p", "-c:v", "libx264", "-crf", "16", "-preset", "fast", str(mp4)])
-        return mp4
+VIEW_W, VIEW_H = 1280, 720      # CSS viewport of the captured pages
+CLIP_W, CLIP_H = 914, 457       # punch-in window in CSS px (1.4x): captured at device scale 1.4 -> exactly 1280x640, crisp, no resampling
+DSF = W / CLIP_W
 
 
 class PollRecorder:
-    """For WebGL pages (the screencast shows the canvas black under software GL): repeated page.screenshot() frames instead."""
+    """Screen recording for a UI beat: repeated page.screenshot(clip=...) frames (about 18 per second), so text is rendered at 1.4x natively
+    (not upscaled). The clip window pans smoothly to wherever the beat is looking (focus), and waiting time can be cut out (pause/resume).
+    Used instead of the CDP screencast, which cannot punch in and shows WebGL canvases black under software GL."""
 
     def __init__(self, page, outdir: Path):
         self.page, self.dir, self.frames = page, outdir, []
         shutil.rmtree(outdir, ignore_errors=True); outdir.mkdir(parents=True)
-        self.t0 = time.time()
+        self.t0, self.skipped, self.paused_at = time.time(), 0.0, None
+        self.cur = self.tgt = (0.0, 0.0)
+
+    def focus(self, target, snap: bool = False, xmin: float = 0):
+        """target: a list of CSS selectors (the window centres on their joint bounding box) or an (x, y) window origin."""
+        if isinstance(target, tuple):
+            x, y = target
+        else:
+            box = self.page.evaluate("""(sels) => { let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; for (const s of sels) { const e=document.querySelector(s); if(!e) continue; const r=e.getBoundingClientRect(); if(!r.width) continue; x0=Math.min(x0,r.left); y0=Math.min(y0,r.top); x1=Math.max(x1,r.right); y1=Math.max(y1,r.bottom); } return x0>1e8 ? null : [x0,y0,x1,y1]; }""", target)
+            if not box:
+                return
+            x, y = (box[0] + box[2]) / 2 - CLIP_W / 2, (box[1] + box[3]) / 2 - CLIP_H / 2
+        self.tgt = (min(max(x, xmin), VIEW_W - CLIP_W), min(max(y, 0), VIEW_H - CLIP_H))
+        if snap:
+            self.cur = self.tgt
 
     def wait(self, ms: int):
         end = time.time() + ms / 1000
         while time.time() < end:
-            t = time.time() - self.t0
+            self.cur = tuple(c + (t - c) * 0.3 for c, t in zip(self.cur, self.tgt))
+            t = time.time() - self.t0 - self.skipped
             name = f"f{len(self.frames):06d}.jpg"
-            self.page.screenshot(path=str(self.dir / name), type="jpeg", quality=88)
+            self.page.screenshot(path=str(self.dir / name), type="jpeg", quality=90, clip={"x": round(self.cur[0]), "y": round(self.cur[1]), "width": CLIP_W, "height": CLIP_H})
             self.frames.append((t, name))
+
+    def pause(self):
+        self.paused_at = time.time()
+
+    def resume(self):
+        if self.paused_at:
+            self.skipped += time.time() - self.paused_at; self.paused_at = None
 
     def stop(self, tail: float = 0.6) -> Path:
         lst = self.dir / "list.txt"
@@ -255,7 +241,7 @@ class PollRecorder:
                 f.write(f"file '{name}'\nduration {max(nxt[0] - t0, 0.001):.4f}\n")
             f.write(f"file '{self.frames[-1][1]}'\n")
         mp4 = self.dir.with_suffix(".mp4")
-        run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-vf", f"fps={FPS},scale={W}:{UI_H}:flags=lanczos,format=yuv420p", "-c:v", "libx264", "-crf", "16", "-preset", "fast", str(mp4)])
+        run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-vf", f"scale={W}:{UI_H}:flags=lanczos,fps={FPS},format=yuv420p", "-c:v", "libx264", "-crf", "16", "-preset", "fast", str(mp4)])
         return mp4
 
 
@@ -268,6 +254,10 @@ def wait_up(url: str):
     raise SystemExit("server did not start: " + url)
 
 
+DONE_JS = "() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent !== 'Working…'"
+STAGE_TOP = "window.scrollTo(0, Math.max(0, document.querySelector('#stageTitle').getBoundingClientRect().top + window.scrollY - 76))"
+
+
 def capture(work: Path, only: set[str] | None = None) -> None:
     from playwright.sync_api import sync_playwright
     outputs = Path(tempfile.mkdtemp(prefix="sd-demo-out-"))
@@ -277,74 +267,89 @@ def capture(work: Path, only: set[str] | None = None) -> None:
     try:
         wait_up(f"http://127.0.0.1:{APP_PORT}/api/config")
         with sync_playwright() as p:
-            b = p.chromium.launch(executable_path=CHROME, headless=True, args=["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--autoplay-policy=no-user-gesture-required", "--hide-scrollbars"])
+            b = p.chromium.launch(executable_path=CHROME, headless=True, args=["--no-sandbox", "--autoplay-policy=no-user-gesture-required", "--hide-scrollbars"])
+            b_gl = p.chromium.launch(executable_path=CHROME, headless=True, args=["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--autoplay-policy=no-user-gesture-required", "--hide-scrollbars"])   # the Space's WebGL previs needs software GL
 
-            def page_for(url: str):
-                ctx = b.new_context(viewport={"width": W, "height": UI_H}, device_scale_factor=1)
+            def page_for(url: str, browser=None):
+                ctx = (browser or b).new_context(viewport={"width": VIEW_W, "height": VIEW_H}, device_scale_factor=DSF)
                 pg = ctx.new_page(); pg.goto(url); pg.wait_for_timeout(1200)
                 return ctx, pg
 
             def want(n):
                 return only is None or n in only
 
+            def popup_says(pg, *bits):
+                """The popup must describe the clip on the stage: wait for it, and fail loudly if it does not (the popup text is driven by the selected clip)."""
+                pg.wait_for_function("(bits) => bits.every(b => document.querySelector('#simBadge').innerText.includes(b))", arg=list(bits), timeout=5000)
+
             base = f"http://127.0.0.1:{APP_PORT}/"
             # ---- previs -> real render (forest cabin, FPV drone)
             if want("previs"):
                 ctx, pg = page_for(base); pg.wait_for_selector(".move")
-                pg.click(".sample[data-id='sample:forest-cabin']"); pg.wait_for_timeout(500)
-                pg.click(".move:has-text('FPV Drone')"); pg.wait_for_timeout(500)
-                rec = Recorder(pg, ctx, work / "cap_previs"); pg.wait_for_timeout(1200)
-                pg.click("#go"); rec.pause(); pg.wait_for_timeout(600); pg.wait_for_function("() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent !== 'Working…'", timeout=120000); rec.resume()
-                top = "window.scrollTo(0, Math.max(0, document.querySelector('#stageTitle').getBoundingClientRect().top + window.scrollY - 70))"
-                pg.evaluate(top); pg.wait_for_timeout(3200)   # simulated clip plays, amber badge + callout visible
-                pg.click("#renderNext button:has-text('Play the real render')"); pg.evaluate(top); pg.wait_for_timeout(6500)
+                pg.click(".sample[data-id='sample:forest-cabin']"); pg.wait_for_timeout(400)
+                pg.click(".move:has-text('FPV Drone')"); pg.wait_for_timeout(400)
+                pg.evaluate("document.querySelector('.move.on').scrollIntoView({block:'center'})")
+                rec = PollRecorder(pg, work / "cap_previs"); rec.focus([".move.on"], snap=True); rec.wait(1600)
+                pg.evaluate("document.querySelector('#go').scrollIntoView({block:'center'})"); rec.focus(["#go", ".move.on"]); rec.wait(1000)
+                pg.click("#go"); rec.pause(); pg.wait_for_timeout(600); pg.wait_for_function(DONE_JS, timeout=120000); rec.resume()
+                pg.evaluate(STAGE_TOP); rec.focus(["#stageTitle", "#simBadge", "#renderNext", "#stage"], snap=True, xmin=372); rec.wait(3600)   # amber previs + the callout
+                pg.click("#renderNext button:has-text('Play the real render')"); pg.evaluate(STAGE_TOP)
+                popup_says(pg, "REAL", "MiniMax H3", "FPV Drone", "Forest Cabin", "own rating 7/10", "136 credits")
+                rec.focus(["#stageTitle", "#simBadge", "#stage"], xmin=372); rec.wait(6500)
                 rec.stop(); ctx.close()
-            # ---- gallery: real clips with credits
+            # ---- gallery: real clips with their own popups (model, move, rating, credits)
             if want("gallery"):
-                ctx, pg = page_for(base); pg.wait_for_selector(".g-item")
-                pg.evaluate("document.querySelector('#gallery').scrollIntoView({block:'start'})"); pg.wait_for_timeout(300)
-                rec = Recorder(pg, ctx, work / "cap_gallery"); pg.wait_for_timeout(1500)
-                for label, hold in (("FPV Drone · Forest Cabin", 3000), ("Orbit Left · Rainy Alley", 3600), ("Arc Shot · Retro Diner", 3600)):
-                    pg.evaluate("(l) => { const el=[...document.querySelectorAll('.g-item')].find(e => e.textContent.includes(l.split(' · ')[0]) && e.textContent.includes(l.split(' · ')[1]) && e.classList.contains('is-real')); if (el) el.click(); }", label)
-                    pg.evaluate("window.scrollTo({top:0})"); pg.wait_for_timeout(hold)
-                    pg.evaluate("document.querySelector('#gallery').scrollIntoView({block:'start'})"); pg.wait_for_timeout(700)
+                ctx, pg = page_for(base); pg.wait_for_selector(".g-item.is-real")
+                pg.evaluate("window.scrollTo(0, 430)"); pg.wait_for_timeout(300)
+                rec = PollRecorder(pg, work / "cap_gallery"); rec.focus((366, 40), snap=True); rec.wait(1500)
+                for tile, bits, hold in ((("FPV Drone", "Forest Cabin"), ("REAL", "MiniMax H3", "FPV Drone on Forest Cabin", "own rating 7/10", "136 credits"), 3000),
+                                         (("Orbit Left", "Rainy Alley"), ("REAL", "Grok Imagine 1.5 lite", "Orbit Left on Rainy Alley", "own rating 6/10", "48.3 credits"), 3800),
+                                         (("Arc Shot", "Retro Diner"), ("REAL", "FLUX 3 Video", "Arc Shot on Retro Diner", "own rating 4/10", "226 credits"), 3800)):
+                    pg.evaluate("(t) => { const el=[...document.querySelectorAll('.g-item.is-real')].find(e => e.textContent.includes(t[0]) && e.textContent.includes(t[1])); el.click(); }", list(tile))
+                    popup_says(pg, *bits); rec.wait(hold)
                 rec.stop(); ctx.close()
             # ---- coverage + A/B
             if want("coverage"):
                 ctx, pg = page_for(base); pg.wait_for_selector(".move")
-                pg.click(".move:has-text('Dolly In')"); pg.click("#go"); pg.wait_for_timeout(600); pg.wait_for_function("() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent !== 'Working…'", timeout=120000)
-                pg.wait_for_timeout(1200)
-                rec = Recorder(pg, ctx, work / "cap_coverage"); pg.wait_for_timeout(600)
+                pg.click(".move:has-text('Dolly In')"); pg.click("#go"); pg.wait_for_timeout(600); pg.wait_for_function(DONE_JS, timeout=120000)
+                pg.evaluate("window.scrollTo(0, 0)"); pg.wait_for_timeout(1200)
+                rec = PollRecorder(pg, work / "cap_coverage"); rec.focus((366, 40), snap=True); rec.wait(700)
                 pg.click("#getCov"); rec.pause(); pg.wait_for_function("() => document.querySelectorAll('#cov .tile.has').length === 6", timeout=120000); rec.resume()
-                pg.wait_for_timeout(2600)
-                pg.click("#abSeg button[data-view=split]"); pg.fill("#wipe", "30"); pg.wait_for_timeout(900); pg.fill("#wipe", "70"); pg.wait_for_timeout(1500)
+                rec.wait(2600)
+                pg.click("#abSeg button[data-view=split]"); pg.fill("#wipe", "30"); rec.wait(900); pg.fill("#wipe", "70"); rec.wait(1500)
                 rec.stop(); ctx.close()
             # ---- make my reel
             if want("reel"):
                 ctx, pg = page_for(base); pg.wait_for_selector(".move")
-                rec = Recorder(pg, ctx, work / "cap_reel"); pg.wait_for_timeout(700)
-                pg.click("#addReal"); pg.wait_for_timeout(1500)
-                pg.evaluate("document.querySelector('#makeReel').scrollIntoView({block:'center'})"); pg.wait_for_timeout(700)
+                pg.evaluate("window.scrollTo(0, 120)")
+                rec = PollRecorder(pg, work / "cap_reel"); rec.focus((366, 300), snap=True); rec.wait(700)
+                pg.click("#addReal"); rec.wait(1500)
                 pg.click("#makeReel"); rec.pause(); pg.wait_for_selector("#reelOut:not(.hidden)", timeout=240000); rec.resume()
-                pg.evaluate("document.querySelector('#reelOut').scrollIntoView({block:'center'})"); pg.wait_for_timeout(500)
-                pg.evaluate("document.querySelectorAll('#reelOut video').forEach(v => { v.muted = true; v.play().catch(()=>{}); })"); pg.wait_for_timeout(4500)
+                pg.evaluate("document.querySelector('#reelOut').scrollIntoView({block:'center'})"); rec.focus(["#reelOut"], snap=True); rec.wait(500)
+                pg.evaluate("document.querySelectorAll('#reelOut video').forEach(v => { v.muted = true; v.play().catch(()=>{}); })"); rec.wait(4500)
                 rec.stop(); ctx.close()
             # ---- the live static Space
             if want("space"):
-                ctx, pg = page_for(SPACE_URL); pg.wait_for_function("window.__sd && window.__sd.ready", timeout=60000); pg.wait_for_timeout(800)
-                top = "window.scrollTo(0, document.querySelector('#stageTitle').getBoundingClientRect().top + window.scrollY - 16)"
-                pg.evaluate(top)
-                rec = PollRecorder(pg, work / "cap_space"); rec.wait(150)
-                pg.click("#previs"); pg.evaluate(top); rec.wait(4600)       # the in-browser WebGL previs (amber)
-                pg.click("#real"); pg.evaluate(top); rec.wait(3200)         # the real clip, green badge
+                ctx, pg = page_for(SPACE_URL, b_gl); pg.wait_for_function("window.__sd && window.__sd.ready", timeout=60000); pg.wait_for_timeout(800)
+                pg.evaluate(STAGE_TOP)
+                rec = PollRecorder(pg, work / "cap_space"); rec.focus(["#stageTitle", "#badge"], snap=True); rec.wait(150)
+                pg.click("#previs"); pg.evaluate(STAGE_TOP); rec.focus(["#stageTitle", "#badge"]); rec.wait(4600)    # in-browser WebGL previs (amber)
+                pg.click("#real"); pg.evaluate(STAGE_TOP); rec.focus(["#stageTitle", "#badge"]); rec.wait(3600)       # the real clip, green popup with its own facts
                 rec.stop(); ctx.close()
-            b.close()
+            b.close(); b_gl.close()
     finally:
         srv.terminate(); shutil.rmtree(outputs, ignore_errors=True)
     print("capture ok")
 
 
 # ----------------------------------------------------------------------------------------------------- assemble
+def ass_tag(kind: str, txt: str) -> str:
+    """Colour the leading REAL / SIMULATED word (green / amber) on the dark label box (ASS colours are BGR)."""
+    word, _, rest = txt.partition(" ")
+    col = "&H99D334&" if kind == "real" else "&H40B3FF&"
+    return "{\\b1\\c" + col + "}" + word + "{\\c&HFFFFFF&}" + (" " + rest if rest else "")
+
+
 def ass_time(t: float) -> str:
     h, m, s = int(t // 3600), int(t % 3600 // 60), t % 60
     return f"{h}:{m:02d}:{s:05.2f}"
@@ -399,7 +404,7 @@ def assemble(work: Path, final: Path) -> dict:
             tt += share
         if b.get("label"):
             kind, txt = b["label"]
-            ass_events.append(f"Dialogue: 1,{ass_time(t + 0.15)},{ass_time(t + dur - 0.1)},{'Real' if kind == 'real' else 'Sim'},,0,0,0,,{txt}")
+            ass_events.append(f"Dialogue: 1,{ass_time(t + 0.15)},{ass_time(t + dur - 0.1)},{'Real' if kind == 'real' else 'Sim'},,0,0,0,,{ass_tag(kind, txt)}")
         timeline.append((b["id"], round(t, 2), round(dur, 2)))
         t += dur
     total = t
@@ -415,8 +420,8 @@ WrapStyle: 0
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Cap,DejaVu Sans,29,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,40,40,16,1
-Style: Real,DejaVu Sans,24,&H00231A04,&H000000FF,&H0099D334,&H0099D334,1,0,0,0,100,100,0,0,3,6,0,7,24,24,22,1
-Style: Sim,DejaVu Sans,24,&H0006131B,&H000000FF,&H0040B3FF,&H0040B3FF,1,0,0,0,100,100,0,0,3,6,0,7,24,24,22,1
+Style: Real,DejaVu Sans,30,&H00FFFFFF,&H000000FF,&H00180F0C,&H00180F0C,1,0,0,0,100,100,0,0,3,10,0,7,24,24,22,1
+Style: Sim,DejaVu Sans,30,&H00FFFFFF,&H000000FF,&H00180F0C,&H00180F0C,1,0,0,0,100,100,0,0,3,10,0,7,24,24,22,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -438,10 +443,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=mono", "-t", f"{total:.2f}", str(audio)])
     final.parent.mkdir(parents=True, exist_ok=True)
     sub = f"ass={ass.name}:fontsdir=/usr/share/fonts/truetype/dejavu"
-    run(["ffmpeg", "-y", "-loglevel", "error", "-i", video.name, "-i", audio.name, "-vf", sub, "-c:v", "libx264", "-crf", "21", "-preset", "slow", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-movflags", "+faststart", "-map_metadata", "-1", "-shortest", str(final.resolve())], cwd=work)
+    # The piper voice's training data (Blizzard 2013, Lessac) is research-licensed: the narrated cut is the ALT file, the captions-only cut the primary
+    # (PRIMARY=tts flips it). The voice track is only mixed in when a voice was synthesised.
+    if os.environ.get("PRIMARY", "captions") == "tts":
+        tts_out, silent_out = final, final.with_name(final.stem + "-captions-only.mp4")
+    else:
+        tts_out, silent_out = final.with_name(final.stem + "-tts.mp4"), final
+    run(["ffmpeg", "-y", "-loglevel", "error", "-i", video.name, "-i", audio.name, "-vf", sub, "-c:v", "libx264", "-crf", "21", "-preset", "slow", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k", "-ar", "44100", "-movflags", "+faststart", "-map_metadata", "-1", "-shortest", str(tts_out.resolve())], cwd=work)
     if have_audio:   # captions-only variant: same picture, silent AAC track
-        silent = final.with_name(final.stem + "-captions-only.mp4")
-        run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(final), "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "32k", "-shortest", "-movflags", "+faststart", str(silent)])
+        run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tts_out), "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "32k", "-shortest", "-movflags", "+faststart", "-map_metadata", "-1", str(silent_out)])
+    else:
+        shutil.copyfile(tts_out, silent_out)
     info = {"seconds": round(total, 2), "beats": timeline, "tts": have_audio}
     (work / "timeline.json").write_text(json.dumps(info, indent=1))
     return info

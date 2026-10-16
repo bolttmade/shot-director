@@ -212,7 +212,7 @@ def create_app() -> FastAPI:
                 f["url"] = f"/examples/outputs/{f['file']}"
         real_items = []
         for c in realmod.scan(S.real_dir):
-            real_items.append({"id": c.id, "kind": "clip", "input": c.input, "preset": c.preset, "variant": c.variant, "url": f"/examples/real/{c.path.name}", "recipe_url": f"/examples/real/{c.recipe_path.name}" if c.imported else None, "simulated": False, "real": True, "badge": c.badge, "imported": c.imported, "model_label": c.notes.get("model_label") or realmod.DEFAULT_MODEL_LABEL, "platform": c.notes.get("platform") or realmod.DEFAULT_PLATFORM, "rating": c.notes.get("rating"), "credits_used": c.notes.get("credits_used")})
+            real_items.append({"id": c.id, "kind": "clip", "input": c.input, "preset": c.preset, "variant": c.variant, "url": f"/examples/real/{c.path.name}", "recipe_url": f"/examples/real/{c.recipe_path.name}" if c.imported else None, "simulated": False, "real": True, "badge": c.badge, "imported": c.imported, "model_label": c.notes.get("model_label") or realmod.DEFAULT_MODEL_LABEL, "platform": c.notes.get("platform") or realmod.DEFAULT_PLATFORM, "rating": c.notes.get("rating"), "credits_used": c.notes.get("credits_used"), "credits_label": c.notes.get("credits_label")})
         real_items.sort(key=lambda i: (-(i["rating"] or 0), i["id"]))  # best-rated real clips first
         data["items"] = real_items + data["items"]  # real clips first
         data["badges"] = {"simulated": "Demo fixture: simulated camera move, not model output"}

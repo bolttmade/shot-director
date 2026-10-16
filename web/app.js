@@ -211,13 +211,26 @@ function applyView() {
 }
 function setView(v) { S.view = v; applyView(); }
 /* Provenance badge: amber = simulated demo fixture, green = real model output. Never show neither for a demo result. */
+/* One line of facts about the clip that is on the stage, built from that clip's own data (model, move, still, rating, credits). */
+function clipFacts(it) {
+  if (!it || !it.real || !it.model_label) return "";
+  const pn = (S.presets.find(p => p.id === it.preset) || {}).name || it.preset, sn = (S.samples.find(x => x.sample_id === it.input) || {}).title || it.input;
+  const cr = it.credits_label || (it.credits_used ? Number(it.credits_used).toFixed(it.credits_used < 100 ? 1 : 0) : null);
+  return [it.model_label, pn && sn ? `${pn} on ${sn}` : null, it.rating != null ? `own rating ${it.rating}/10` : null, cr != null ? `${cr} credits` : "free tier"].filter(Boolean).join(" · ");
+}
 function showSim(on, real) {
   const b = $("#simBadge");
   const r = real && real.real;
   b.classList.toggle("hidden", !(on || r));
   b.classList.toggle("real", !!r);
-  if (r) { b.textContent = real.badge || "Real LTX-2.3 output (Comfy Cloud)"; b.title = "Real model output (Comfy Cloud or Comfy Router) replayed from examples/real/"; }
-  else if (on) { b.textContent = S.badge; b.title = "This output was produced by the Demo engine, not by a generative model"; }
+  if (r) {
+    // a real clip replayed by the Demo engine carries no model fields: take them from that clip's own gallery entry (same still + move)
+    const src = S.source && S.samples.find(x => x.id === S.source.id);
+    const it = real.model_label ? real : S.gallery.find(i => i.kind === "clip" && i.real && !i.variant && src && i.input === src.sample_id && i.preset === S.presetId);
+    const facts = real.facts || clipFacts(it);
+    b.replaceChildren(h("b", { class: "sb-head" }, "REAL" + (facts ? " · " + facts : "")), h("span", { class: "sb-note" }, real.badge || "Real LTX-2.3 output (Comfy Cloud)"));
+    b.title = "Real model output (Comfy Cloud or Comfy Router) replayed from examples/real/";
+  } else if (on) { b.replaceChildren(h("b", { class: "sb-head" }, "SIMULATED"), h("span", { class: "sb-note" }, S.badge)); b.title = "This output was produced by the Demo engine, not by a generative model"; }
 }
 
 function updateActions() {
@@ -242,7 +255,7 @@ function renderNext() {
   const router = S.engines.find(e => e.kind === "router" && e.health.ok);
   box.className = "callout" + (real ? " real" : "");
   box.append(h("span", {}, h("b", {}, "Previsualised. "), real ? `Happy with this move? A real render of this exact still and move exists (${real.model_label} via ${real.platform}${real.credits_used != null ? `, ${Number(real.credits_used).toFixed(0)} credits` : ""}).` : "Happy with this move? Render it once for real; previs is free, the render spends credits."));
-  if (real) box.append(h("button", { class: "btn btn-sm", onclick: () => { setVideo(real.url); S.result = { artifacts: [{ kind: "video", url: real.url }], recipe_url: real.recipe_url, simulated: false, real: true, badge: real.badge, model_label: real.model_label, platform: real.platform }; S.view = "video"; applyView(); showSim(false, S.result); $("#stageTitle").textContent = `${(S.presets.find(p => p.id === S.presetId) || {}).name} · ${src.title} · real render`; updateActions(); } }, "Play the real render"));
+  if (real) box.append(h("button", { class: "btn btn-sm", onclick: () => { setVideo(real.url); S.result = { artifacts: [{ kind: "video", url: real.url }], recipe_url: real.recipe_url, simulated: false, real: true, badge: real.badge, model_label: real.model_label, platform: real.platform, preset: real.preset, input: real.input, rating: real.rating, credits_used: real.credits_used, credits_label: real.credits_label }; S.view = "video"; applyView(); showSim(false, S.result); $("#stageTitle").textContent = `${(S.presets.find(p => p.id === S.presetId) || {}).name} · ${src.title} · real render`; updateActions(); } }, "Play the real render"));
   else if (router) box.append(h("button", { class: "btn btn-sm", onclick: () => { pickEngine(router.id); toast("Router engine selected: check the estimate, then Render for real"); } }, "Use the Router engine"));
 }
 
@@ -402,7 +415,7 @@ function renderGallery() {
     const tag = h("em", { class: "g-tag " + (it.real ? "real" : "sim") }, it.real ? "REAL" : "SIM");
     box.append(h("button", { class: "g-item" + (it.real ? " is-real" : ""), title: label + (it.real ? ` (${it.badge})` : " (simulated placeholder)"), onclick: () => {
       const rurl = it.recipe_url || (it.recipe ? `/examples/outputs/${it.recipe}` : null);
-      setVideo(it.url); S.result = { artifacts: [{ kind: "video", url: it.url }], recipe_url: rurl, simulated: !!it.simulated, real: !!it.real, badge: it.badge, model_label: it.model_label, platform: it.platform };
+      setVideo(it.url); S.result = { artifacts: [{ kind: "video", url: it.url }], recipe_url: rurl, simulated: !!it.simulated, real: !!it.real, badge: it.badge, model_label: it.model_label, platform: it.platform, preset: it.preset, input: it.input, rating: it.rating, credits_used: it.credits_used, credits_label: it.credits_label };
       S.view = "video"; applyView(); showSim(!!it.simulated, S.result); $("#stageTitle").textContent = label; updateActions();
     } }, v, tag, h("span", {}, label)));
   }
