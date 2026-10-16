@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shot Director: free previs, then one real render</title>
+<meta name="description" content="Static demo of Shot Director: preview a camera move for free in your browser (simulated), then play the real model render of the same still and move.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%23ffb340%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div><h1>Shot Director</h1><p class="tag">Free previs, then one real render.</p></div>
+  <div class="top-r"><span class="pill demo">STATIC DEMO · no backend · no keys</span>
+  <a class="pill" href="https://github.com/bolttmade/shot-director" target="_blank" rel="noopener">GitHub · MIT</a></div>
+</header>
+
+<main>
+  <p class="honest"><b>How to read this page.</b> <span class="b sim">AMBER</span> = <b>simulated previs</b>, computed in your browser from a still and a depth guess (a simplified depth-parallax camera; not model output). <span class="b real">GREEN</span> = <b>real model output</b> made once through the Comfy Router API or Comfy Cloud on 2026-10-16: unedited, prompt-only, no camera LoRA, partner models (not open weights, not LTX, except the two LTX-2.3 clips). The clips on this page are web copies, re-encoded smaller and without audio. Credits and request ids are the real ones.</p>
+
+  <section class="grid">
+    <div class="card">
+      <h2><span class="n">1</span> Source frame</h2>
+      <div id="inputs" class="inputs"></div>
+      <p id="inputNote" class="hint"></p>
+      <h2><span class="n">2</span> Direct the camera</h2>
+      <div id="cats" class="chips"></div>
+      <div id="moves" class="moves"></div>
+    </div>
+
+    <div class="card stage-card">
+      <div class="stage-h"><h2 id="stageTitle">Pick a still and a move</h2><span id="badge" class="b hidden"></span></div>
+      <div class="stage">
+        <canvas id="gl" width="960" height="540"></canvas>
+        <video id="vid" class="hidden" controls loop muted playsinline></video>
+        <div id="glFail" class="glfail hidden">WebGL is not available in this browser, so the in-browser previs cannot run. The real clips below still play.</div>
+      </div>
+      <div class="actions">
+        <button id="previs" class="btn amber">Previs this shot (free, simulated)</button>
+        <button id="real" class="btn green" disabled>Play the real render</button>
+        <button id="still" class="btn">Show the still</button>
+      </div>
+      <div id="info" class="info"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> The real clips <small id="galCount"></small></h2>
+    <p class="hint">Click a clip to play it. Own ratings out of 10 are mine and subjective; credits are measured by balance delta (211 credits per US dollar).</p>
+    <div id="gallery" class="gallery"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span> Coverage: six real angles of one still</h2>
+    <p class="hint">FLUX 3 Image edits of the alley still via the Comfy Router (6 requests, 86.9 credits, unedited). The close-up shows a small garbled, unreadable emblem on the scooter: it is generated, not a real logo.</p>
+    <div id="coverage" class="coverage"></div>
+  </section>
+
+  <section class="card" id="runCard">
+    <h2><span class="n">5</span> Optional: run it for real with your own key</h2>
+    <p class="hint">This page has no backend. If you have a Comfy API key with credits you can render the selected still and move yourself: your browser calls <code>api.comfy.org</code> directly. The key is kept <b>in this tab's memory only</b> (never saved, never put in the URL, never sent anywhere except <code>api.comfy.org</code>) and is gone when you close or reload the tab. Every run costs <b>your</b> credits, is submitted <b>once and never retried</b>, and needs an explicit confirmation. Not tested by anyone but the author, with a few cents of credits. Prefer the repo if you would rather not paste a key into a web page.</p>
+    <div class="run">
+      <label>API key <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="paste your Comfy API key (memory only)"></label>
+      <label>Model <select id="model">
+        <option value="grok480">Grok Imagine 1.5 lite, 480p (cheapest, about 7 credits/s)</option>
+        <option value="grok720">Grok Imagine 1.5 lite, 720p (about 9.7 credits/s)</option>
+        <option value="h3">MiniMax H3, 768P (about 27 credits/s)</option>
+      </select></label>
+      <label>Length <select id="dur"><option>2</option><option>3</option><option selected>5</option></select> s</label>
+      <label>Credit cap <input id="cap" type="number" value="60" min="1" max="500" step="1"></label>
+      <div class="est" id="est"></div>
+      <label class="chk"><input id="confirm" type="checkbox"> I understand this spends about <b id="estN">0</b> of my credits once and will not be retried.</label>
+      <button id="runBtn" class="btn green" disabled>Render for real</button>
+      <div id="runOut" class="info"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Source, honest status, credit log and process: <a href="https://github.com/bolttmade/shot-director" target="_blank" rel="noopener">github.com/bolttmade/shot-director</a>. The full app (server, six-engine UI, timeline, reel export) runs locally with <code>DEMO=1 ./run.sh</code>. This static page is a client-side replay of its gallery plus a simplified in-browser previs; it does not run any generative model by itself.</p>
+    <p>All stills are AI-generated originals (no people, no photos); see <code>examples/CREDITS.md</code>. Partner-model outputs keep their providers' terms.</p>
+  </footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

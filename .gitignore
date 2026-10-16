@@ -12,3 +12,4 @@ node_modules/
 
 # real-clip originals (large)
 examples/real/_originals/
+/space/
