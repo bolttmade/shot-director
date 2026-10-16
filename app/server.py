@@ -204,7 +204,7 @@ def create_app() -> FastAPI:
                 f["url"] = f"/examples/outputs/{f['file']}"
         real_items = []
         for c in realmod.scan(S.real_dir):
-            real_items.append({"id": c.id, "kind": "clip", "input": c.input, "preset": c.preset, "url": f"/examples/real/{c.path.name}", "recipe_url": f"/examples/real/{c.recipe_path.name}" if c.imported else None, "simulated": False, "real": True, "badge": c.badge, "imported": c.imported})
+            real_items.append({"id": c.id, "kind": "clip", "input": c.input, "preset": c.preset, "variant": c.variant, "url": f"/examples/real/{c.path.name}", "recipe_url": f"/examples/real/{c.recipe_path.name}" if c.imported else None, "simulated": False, "real": True, "badge": c.badge, "imported": c.imported})
         data["items"] = real_items + data["items"]  # real clips first
         data["badges"] = {"simulated": "Demo fixture: simulated camera move, not model output"}
         return data

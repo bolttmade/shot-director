@@ -22,15 +22,23 @@ from typing import Any
 from .config import ROOT
 
 REAL_DIR = ROOT / "examples" / "real"
-NAME_RE = re.compile(r"^(?P<input>[a-z0-9]+(?:-[a-z0-9]+)*)__(?P<preset>[a-z0-9]+(?:-[a-z0-9]+)*)\.mp4$")
+NAME_RE = re.compile(r"^(?P<input>[a-z0-9]+(?:-[a-z0-9]+)*)__(?P<preset>[a-z0-9]+(?:-[a-z0-9]+)*)(?:__(?P<variant>[a-z0-9]+(?:-[a-z0-9]+)*))?\.mp4$")
 DEFAULT_MODEL_LABEL = "LTX-2.3"
 DEFAULT_PLATFORM = "Comfy Cloud"
 PROVENANCE = "real LTX-2.3 output via Comfy Cloud web UI"
 
 
 def parse_name(name: str) -> tuple[str, str] | None:
+    """(input, preset) for `<input>__<preset>.mp4` and for `<input>__<preset>__<variant>.mp4` (see parse_variant)."""
     m = NAME_RE.match(name)
     return (m["input"], m["preset"]) if m else None
+
+
+def parse_variant(name: str) -> str | None:
+    """Optional third part of the file name, e.g. `router-grok-imagine-1-5-lite`. A variant clip is an extra real clip for
+    the same input + move made by a different model; the Demo engine never substitutes it for a plain clip."""
+    m = NAME_RE.match(name)
+    return m["variant"] if m else None
 
 
 def _load_json(p: Path) -> dict[str, Any]:
@@ -57,10 +65,11 @@ class RealClip:
     notes: dict[str, Any] = field(default_factory=dict)
     recipe: dict[str, Any] = field(default_factory=dict)
     imported: bool = False
+    variant: str | None = None
 
     @property
     def id(self) -> str:
-        return f"{self.input}__{self.preset}"
+        return f"{self.input}__{self.preset}" + (f"__{self.variant}" if self.variant else "")
 
     @property
     def badge(self) -> str:
@@ -76,7 +85,7 @@ class RealClip:
         return {
             "schema": "shot-director/recipe@1",
             "kind": "shot",
-            "engine": "comfy-cloud-web",
+            "engine": self.notes.get("engine") or "comfy-cloud-web",
             "model": self.notes.get("model") or DEFAULT_MODEL_LABEL,
             "simulated": False,
             "provenance": PROVENANCE + " (dropped into examples/real/ but NOT yet imported with scripts/import_real.py: unvalidated)",
@@ -95,7 +104,7 @@ def scan(real_dir: Path = REAL_DIR) -> list[RealClip]:
         if not parsed or p.stat().st_size == 0:
             continue
         rp = p.with_suffix(".recipe.json")
-        out.append(RealClip(parsed[0], parsed[1], p, _load_json(p.with_suffix(".json")), _load_json(rp), rp.is_file()))
+        out.append(RealClip(parsed[0], parsed[1], p, _load_json(p.with_suffix(".json")), _load_json(rp), rp.is_file(), parse_variant(p.name)))
     return out
 
 
@@ -103,7 +112,7 @@ def find(input_id: str | None, preset_id: str, real_dir: Path = REAL_DIR) -> Rea
     if not input_id:
         return None
     for c in scan(real_dir):
-        if c.input == input_id and c.preset == preset_id:
+        if c.input == input_id and c.preset == preset_id and not c.variant:  # variant clips are gallery-only
             return c
     return None
 

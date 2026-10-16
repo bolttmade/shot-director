@@ -45,7 +45,9 @@ def test_alley_input_exists_and_is_listed():
 
 def test_parse_name():
     assert realmod.parse_name("alley__dolly-in.mp4") == ("alley", "dolly-in")
-    for bad in ("alley.mp4", "Alley__dolly-in.mp4", "alley__dolly_in.mp4", "alley__dolly-in.mov", "a__b__c.mp4"):
+    assert realmod.parse_name("alley__dolly-in__router-x.mp4") == ("alley", "dolly-in") and realmod.parse_variant("alley__dolly-in__router-x.mp4") == "router-x"
+    assert realmod.parse_variant("alley__dolly-in.mp4") is None
+    for bad in ("alley.mp4", "Alley__dolly-in.mp4", "alley__dolly_in.mp4", "alley__dolly-in.mov", "a__b__c__d.mp4", "a__b__C.mp4"):
         assert realmod.parse_name(bad) is None
 
 
@@ -235,7 +237,8 @@ def test_badge_honours_override_and_quality():
 def test_committed_real_clips_are_honest():
     """The two real clips shipped in examples/real/: labelled prompt-only, crane flagged partial, the failed orbit is NOT featured."""
     d = ROOT / "examples" / "real"
-    names = {p.name for p in d.glob("*.mp4")}
+    router_name = "alley__dolly-in__router-grok-imagine-1-5-lite.mp4"
+    names = {p.name for p in d.glob("*.mp4")} - {router_name}
     assert names == {"alley__dolly-in.mp4", "alley__crane-up.mp4"}
     for n in names:
         rec = json.loads((d / n.replace(".mp4", ".recipe.json")).read_text())
@@ -268,3 +271,20 @@ def test_real_workflows_have_no_secrets_or_partner_nodes():
         assert not re.search(r"[\w.+-]+@[\w-]+\.[\w.]+|sk-[A-Za-z0-9]{10,}|Bearer |api[_-]?key|token", txt, re.I), f.name
         assert cow.check_graph(json.loads(txt)) == []
         assert "prompt" not in json.loads(txt)["extra"]
+
+
+def test_committed_router_clip_is_honest_and_never_replaces_the_ltx_clip():
+    """One real Router clip (Grok Imagine 1.5 lite, prompt-only). It is a gallery-only variant: Demo never substitutes it."""
+    d = ROOT / "examples" / "real"
+    n = "alley__dolly-in__router-grok-imagine-1-5-lite.mp4"
+    rec = json.loads((d / n.replace(".mp4", ".recipe.json")).read_text())
+    assert rec["simulated"] is False and rec["engine"] == "router" and rec["metadata_stripped"] is True
+    assert rec["model"].startswith("xai/grok-imagine-video-1.5-lite")
+    assert "Router" in rec["badge"] and "not open weights" in rec["badge"] and "unedited" in rec["badge"]
+    assert "LoRA" not in rec["badge"].replace("no camera LoRA", "")
+    assert rec["notes"]["camera_lora"] is False and rec["notes"]["open_weights"] is False and rec["notes"]["edited"] is False
+    assert rec["credits_used"] and rec["notes"]["router_request_id"]
+    assert "workflow" not in _tags(d / n)
+    clip = realmod.find("alley", "dolly-in", d)
+    assert clip is not None and clip.variant is None and clip.path.name == "alley__dolly-in.mp4"
+    assert any(c.variant == "router-grok-imagine-1-5-lite" for c in realmod.scan(d))

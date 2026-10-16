@@ -1,6 +1,6 @@
 # The real run: what was actually done
 
-Short record of how the real clips in `examples/real/` were made, so nobody has to guess. Nothing here is a plan that has not happened, except the last section.
+Short record of how the real clips in `examples/real/` were made (three from Comfy Cloud's web UI, one from the Router API), so nobody has to guess. Nothing here is a plan that has not happened, except the last section.
 
 ## What was run
 
@@ -19,11 +19,24 @@ Short record of how the real clips in `examples/real/` were made, so nobody has 
 |---|---|---|---|---|
 | `alley__dolly-in.mp4` | `dolly-in` | slow level forward dolly down the alley | Smooth forward dolly with some background warping. Own rating 5/10. | Yes, green badge |
 | `alley__crane-up.mp4` | `crane-up` | slow crane move upward revealing the alley | **Partial:** it rises, but also pushes forward and the scooter flattens. Own rating 5/10. | Yes, green badge **plus** "partial: rises but also pushes forward" |
+| `alley__dolly-in__router-grok-imagine-1-5-lite.mp4` | `dolly-in` | short preset prompt: the camera dollies in smoothly (Router, Grok Imagine 1.5 lite, 5 s @ 480p; see Run 4 below) | Smooth push-in, some invented detail at the end. Own rating 6/10. | Gallery only, own green badge |
 | orbit-left (not in the repo as a clip) | `orbit-left` | slow orbit left around the scooter | **Did not orbit.** Own rating 4/10. | **No.** Not imported, not shown anywhere. Only its workflow is kept in `workflows/real/` for the record |
 
 One earlier pilot render was discarded and is not used anywhere.
 
 Takeaway, stated plainly: with a prompt alone, LTX-2.3 follows a plain dolly reasonably, a crane only partly, and an orbit not at all. Reliable camera control needs a camera-control LoRA (or a depth-based camera, as in this app's demo path), which need a local GPU and have **not been run** here.
+
+## Run 4 (Router): the smoke test (2026-10-16, real, via API)
+
+- **What:** `scripts/smoke_real.py --duration 5 --max-credits 150`, so the whole Router path ran live for the first time: build request, `/estimate`, cap check, ONE `submit`, poll, download, importer.
+- **Model:** `xai/grok-imagine-video-1.5-lite` (Grok Imagine 1.5 lite, a partner model: **not open weights**), the cheapest image-to-video model on Router. Not LTX, not a camera LoRA.
+- **Request:** `examples/inputs/alley.jpg` as the first frame + the `dolly-in` preset prompt (exact text in the recipe), 5 s, 480p, 16:9. The delivered file is 736x400, 5.04 s, 24 fps, H.264 + AAC.
+- **Estimate:** `/estimate` replied that it is not enabled for this workspace, so the app used the static price table: **30.17 credits (about $0.143)**, under the 150-credit cap. This is the number the app recorded as `credits_used`.
+- **Real cost:** a read-only balance check afterwards showed 984.27 cents. Against a presumed 1,000 cents before (not read before the run) that is about 33.2 credits. So the charge is **about 30-33 credits** and the exact figure is unverified.
+- **Failures:** none. One submit, no retries, no 402. The request id is in the recipe.
+- **Result:** `examples/real/alley__dolly-in__router-grok-imagine-1-5-lite.mp4` (+ `.json` notes, `.recipe.json`). A smooth, steady push down the alley; the scooter slides out on the left and the steam drifts; lighting stays consistent. The walls and windows near the end are invented by the model. 480p. Own rating **6/10**, prompt-only, unedited (the importer only strips container metadata).
+- **In the app:** the file name carries a third part (`<input>__<preset>__<variant>.mp4`), which makes it a gallery-only clip with its own green badge naming Grok Imagine 1.5 lite and Comfy Router. The Demo engine keeps replaying the LTX-2.3 clip for `alley` + `dolly-in`; it never substitutes the Router clip.
+- **What it proves:** the Router adapter works against the live API for image-to-video (submit, queue, download within the link lifetime). It does **not** prove the other engines, the FLUX stills, `/estimate`, or anything about camera LoRAs.
 
 ## How they get into the app
 
@@ -43,12 +56,12 @@ cp alley__dolly-in.mp4 alley__dolly-in.json examples/real/     # .json = notes (
 | Badge | green | amber |
 | May be called "model output" | yes | **never** |
 
-## A possible 4th run (on hold)
+## A possible further Cloud web run (on hold)
 
 One free run is left and is being held. If it is used, it needs:
 
 1. Same template, same input `alley.jpg`, settings left at defaults (so it is comparable).
 2. Decide the goal first. A re-try of `orbit-left` with a different prompt is the only one that would change the story; do not expect a prompt alone to fix it.
-3. Before pressing Run: check there is no price, "Upgrade" or credits prompt. If there is, stop. **No credits have been spent so far.** A small Router top-up may be used for a Router smoke test (`scripts/smoke_real.py`) only if the owner explicitly approves it; never add a card, subscribe or spend credits without that explicit approval.
+3. Before pressing Run: check there is no price, "Upgrade" or credits prompt. If there is, stop. The Cloud web runs cost no credits. The only credits spent so far are the ~30-33 of the Router smoke test above; never add a card, subscribe or spend further credits without the owner's approval.
 4. Save the video as `alley__<preset-id>.mp4` and write a notes JSON from `examples/real/_notes.example.json` with the **exact** prompt and an honest verdict; export the workflow (Comfy icon → File → **Export**) into `workflows/real/`; then run `scripts/import_real.py`.
 5. If the result is bad, keep it out of the gallery (it can stay in `workflows/real/` as a documented failure).

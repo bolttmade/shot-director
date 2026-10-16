@@ -8,7 +8,7 @@
 2. Never call an amber clip "AI-generated" or "model output".
 3. Never show or imply camera-LoRA results: none exist. The controllable camera path (virtual camera, LoRA recipes) is demo/simulated or untested.
 4. Say the quality of the real clips plainly: the dolly is smooth with some warping, the crane only partly works. The failed orbit is not shown.
-5. Say that the open-weights, Cloud and Router engines are contract-tested but not run live.
+5. Say that the open-weights and Cloud engines are contract-tested but not run live, and the Router engine was run live once (one Grok Imagine 1.5 lite clip, about 30 credits).
 
 **Setup:** `DEMO=1 ./run.sh` (or the Docker image), browser at 1280x720. Start on the `alley` frame. No keys needed. Keep the end card under 5 s so editing slop cannot push the cut past 2:00.
 
@@ -22,7 +22,7 @@
 | 4 | 0:44 to 0:58 | Pick **Crane Up**: the green clip with "partial: rises but also pushes forward". | "The crane is only partly right: it rises, but also pushes forward. A prompt alone does not give reliable camera control; that is what camera LoRAs are for, and I have not been able to run them, so I will not show them." | Read the "partial" label. |
 | 5 | 0:58 to 1:16 | **Orbit Left** on the alley: amber clip. **A/B** split of still vs clip. **Get coverage**: six tiles. | "For moves I could not run for real, the app uses its own simulated camera so you can see the workflow without a GPU; this badge says so. The A/B player compares still and clip, and the coverage board gives six angles from one frame." | Amber badge named: "simulated". |
 | 6 | 1:16 to 1:30 | Add 3 clips to the timeline, reorder, **Export sequence**, play. | "Drop shots on the timeline, reorder, export one cut with crossfades. A cut that contains any simulated clip is flagged simulated." | Point at the "simulated" / "real" tag per timeline clip. |
-| 7 | 1:30 to 1:40 | Engines list and the repo/licence line. | "The same presets drive open-weights ComfyUI, Cloud or the Router. Those engines are contract-tested but not yet run live." | No claim of live runs. |
+| 7 | 1:30 to 1:40 | Engines list and the repo/licence line. | "The same presets drive open-weights ComfyUI, Cloud or the Router. The Router has been run live once for one short clip; the open-weights and Cloud engines are contract-tested but not yet run live." | No claim that open weights or Cloud have run live. |
 | 8 | 1:40 to 1:45 | End card, `#OpenSourceHiggsfield`. | "Shot Director. Built for the Comfy Open Source Higgsfield contest." | Repo link: github.com/bolttmade/shot-director. |
 
 249 spoken words (counted from the voice-over column): needs a brisk but clear read for 1:45. If it runs long, cut the last sentence of beat 2 first, then beat 6.
@@ -32,7 +32,7 @@
 - Not "AI-generated" / "model output" for anything with the amber badge.
 - Not "powered by LTX-2.3" for the app itself: the two real clips are plain LTX-2.3 prompts on Comfy Cloud, made in the Cloud web UI, not through this app's pipeline.
 - Not that camera control works. The orbit prompt did not orbit; the crane partly worked.
-- Not that the open-weights / Cloud / Router engines or the camera LoRAs "work" until they have been run live.
+- Not that the open-weights / Cloud engines or the camera LoRAs "work" until they have been run live (the Router has run live once, for one clip).
 
 ## Social post draft (DRAFT, not posted)
 

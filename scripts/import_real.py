@@ -170,7 +170,7 @@ def import_clip(path: Path, *, real_dir: Path, inputs_dir: Path, presets_dir: Pa
     meta = json.loads((inputs_dir / f"{inp}.json").read_text())
     model = notes.get("model") or "LTX-2.3 (Comfy Cloud template 'LTX-2.3: Image to Video')"
     recipe = make_recipe(
-        kind="shot", engine="comfy-cloud-web", model=model, source_name=meta.get("title", inp), source_sha256=sha256_file(src_img), preset_id=preset,
+        kind="shot", engine=notes.get("engine") or "comfy-cloud-web", model=model, source_name=meta.get("title", inp), source_sha256=sha256_file(src_img), preset_id=preset,
         prompt=str(notes.get("prompt", "")), seed=int(notes["seed"]) if str(notes.get("seed", "")).lstrip("-").isdigit() else 0,
         workflow_sha256=sha256_file(wf) if (wf := ROOT / "workflows" / "real" / str(notes.get("workflow_file", ""))).is_file() and notes.get("workflow_file") else None,
         params={"resolution": notes.get("resolution") or f"{info_out['width']}x{info_out['height']}", "duration_s": notes.get("duration") or round(info_out["duration"], 2), "fps": info_out["fps"], "template": notes.get("template"), "settings": notes.get("settings")},

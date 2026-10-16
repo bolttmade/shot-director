@@ -25,4 +25,13 @@ A 5 s MiniMax H3 clip is about $0.64 (about 136 credits), which is **over the de
 
 `MAX_CREDITS_PER_RUN` (default 50), `ALLOW_UNKNOWN_COST`, mandatory confirmation, no automatic retries, immediate downloads. Details in [HOW_IT_WORKS.md](HOW_IT_WORKS.md#cost-safety-router-and-cloud).
 
-The development of this project spent **$0**: no key was available, and the Router and Cloud paths have never been called live.
+## Credit log (what was actually spent)
+
+| Date (UTC) | Where | What | Credits | Source of the number |
+|---|---|---|---|---|
+| 2026-10-16 | Comfy Cloud web UI (free account) | 3 LTX-2.3 prompt-only runs (dolly-in, crane-up, orbit-left) + 1 discarded pilot | 0 | free tier |
+| 2026-10-16 | Router API | `scripts/smoke_real.py --duration 5`: `xai/grok-imagine-video-1.5-lite`, `alley` + `dolly-in`, 5 s @ 480p, ONE request (id `f98c1931-c864-4678-9671-60d4f9d9df48`), not retried | **30.17 (estimate), ~33.2 implied by balance** | `/estimate` answered "not enabled", so the app used its static price table (30.17 credits, about $0.143). The balance read afterwards was 984.27 cents; against a presumed 1,000 cents before (the top-up was $10.00, and the balance before the run was NOT read) that is 15.73 cents, about 33.2 credits at 211 per USD. True charge unverified: roughly 30-33 credits |
+
+Balance after the run: **984.27 cents (about $9.84, about 2,077 credits)** from `GET https://api.comfy.org/customers/balance` (read-only). Total Router spend so far: about 30-33 credits of the 2,110 credits (the $10 top-up); a reserve of at least 300 credits is kept for the final hero clip. Credits come from a top-up by the owner; no further card charge has been made.
+
+The Router `/estimate` endpoint answered "not enabled" for this workspace, so the static table above is what is shown to users and it was within about 10% of what the balance implies.
