@@ -1,0 +1,11 @@
+{
+  "id": "retro-diner",
+  "title": "Retro Diner",
+  "file": "retro-diner.jpg",
+  "subject": [
+    0.45,
+    0.7
+  ],
+  "blurb": "An empty retro diner at dusk: red booths, chrome stools, rain on the windows. Input for the real Router clips.",
+  "license": "Original image generated for this project with FLUX 3 Image via the Comfy Router (an AI image generator; text prompt only, no reference image); see examples/CREDITS.md; no people, no text, no logos"
+}

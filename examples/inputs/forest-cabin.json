@@ -1,0 +1,11 @@
+{
+  "id": "forest-cabin",
+  "title": "Forest Cabin",
+  "file": "forest-cabin.jpg",
+  "subject": [
+    0.62,
+    0.6
+  ],
+  "blurb": "A misty pine forest at dawn with a lone wooden cabin and warm window light. Input for the real Router clips.",
+  "license": "Original image generated for this project with FLUX 3 Image via the Comfy Router (an AI image generator; text prompt only, no reference image); see examples/CREDITS.md; no people, no text, no logos"
+}
