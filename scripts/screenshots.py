@@ -47,7 +47,7 @@ def to_webp(png: Path, width: int = 1400, quality: int = 78) -> None:
 
 
 def shot_done(pg, timeout=120000):
-    pg.wait_for_function("() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent === 'Generate shot'", timeout=timeout)
+    pg.wait_for_function("() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent !== 'Working…'", timeout=timeout)
 
 
 def pick(pg, name):
@@ -67,8 +67,13 @@ def stills(chrome: str) -> None:
             pg.wait_for_timeout(500)
             pg.screenshot(path=OUT / f"{n}.png")
 
+        # 01: free previs first, then the one real render of the same still and move (MiniMax H3 via the Router, green badge)
+        pg.click(".sample[data-id='sample:forest-cabin']"); pg.wait_for_timeout(600)
+        pick(pg, "FPV Drone"); pg.click("#go"); shot_done(pg); pg.wait_for_timeout(1000)
+        pg.click("#renderNext button:has-text('Play the real render')"); pg.wait_for_timeout(2200)
+        shot("01-real-render")
+        pg.click(".sample[data-id='sample:alley']"); pg.wait_for_timeout(600)
         pick(pg, "Dolly In"); pg.click("#go"); shot_done(pg); pg.wait_for_timeout(1800)
-        shot("01-real-dolly-in")                        # real clip, green badge
         pg.click("#addTl")
         pg.click("#abSeg button[data-view=split]"); pg.fill("#wipe", "45"); pg.wait_for_timeout(500)
         shot("02-ab-player")
@@ -133,7 +138,7 @@ def gif(chrome: str) -> None:
     def until_done(pg, timeout=120):
         t = time.time()
         while time.time() - t < timeout:
-            if pg.evaluate("() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent === 'Generate shot'"):
+            if pg.evaluate("() => !document.querySelector('#go').disabled && document.querySelector('#go').textContent !== 'Working…'"):
                 return
             snap(pg)
 

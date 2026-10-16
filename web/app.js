@@ -314,11 +314,19 @@ function renderCoverage(items) {
       h("button", { class: "animate", title: "Use this still as the new source frame", onclick: async () => { try { const r = await api("/api/adopt", { json: { url: a.url } }); await setSource(r.id, { id: r.id, url: r.url, name: `${S.source ? S.source.name : "Shot"} · ${l}` }); toast("Now animating this angle"); } catch (e) { showError(e); } } }, "ANIMATE")));
   }
 }
+/* The coverage board carries its own provenance badge, so it can never relabel the clip on the stage. */
+function covBadge(r) {
+  const b = $("#covBadge"), real = !!(r && r.real);
+  b.classList.toggle("hidden", !(real || (r && r.simulated)));
+  b.classList.toggle("real", real);
+  b.textContent = real ? (r.badge || "Real model output") : (S.badge || "Demo fixture: simulated, not model output");
+  b.style.marginBottom = "8px";
+}
 async function getCoverage() {
   if (!S.source) return;
   if (!(await confirmSpend(null))) return;
   await runJob(() => api("/api/coverage", { json: { source_id: S.source.id, engine: S.engineId, scene: $("#scene").value.trim(), model: S.model || null, confirm_cost: true } }), {
-    onDone: r => { renderCoverage(r.artifacts); showSim(r.simulated, r); toast(r.simulated ? "Coverage ready (simulated)" : "Coverage ready"); },
+    onDone: r => { renderCoverage(r.artifacts); covBadge(r); toast(r.simulated ? "Coverage ready (simulated)" : "Coverage ready"); },
   });
 }
 
