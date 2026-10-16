@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shot Director: one frame in, full coverage out</title>
+<meta name="description" content="Open-source camera-move studio for Comfy workflows. Pick a camera move, re-shoot from another angle, get a coverage board and cut a sequence.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23101218'/%3E%3Cpath d='M6 12h20v13H6z' fill='none' stroke='%23ffb340' stroke-width='2.2'/%3E%3Cpath d='M6 12l3-6 4 1.2-3 6M14 13.2l3-6 4 1.2-3 6' fill='%23ffb340'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#171a22"/><path d="M6 12h20v13H6z" fill="none" stroke="#ffb340" stroke-width="2.2"/><path d="M6 12l3-6 4 1.2-3 6M14 13.2l3-6 4 1.2-3 6" fill="#ffb340"/></svg>
+    <div><h1>Shot Director</h1><p>One frame in, full coverage out.</p></div>
+  </div>
+  <div class="top-right">
+    <span id="modePill" class="pill hidden"></span>
+    <span id="enginePill" class="pill pill-engine" title="Active engine"></span>
+    <a class="link" id="repoLink" href="https://github.com/bolttmade/shot-director" target="_blank" rel="noopener">Open source · MIT</a>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- LEFT: source + camera -->
+  <section class="pane left" aria-label="Source and camera">
+    <div class="card">
+      <div class="card-h"><span class="step">1</span><h2>Source frame</h2></div>
+      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Drop an image or click to choose">
+        <input id="file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <img id="srcPreview" class="hidden" alt="Source frame preview">
+        <div id="dropHint"><strong>Drop an image</strong><span>or click to browse · PNG, JPG, WebP</span></div>
+      </div>
+      <div class="samples" id="samples" aria-label="Sample frames"></div>
+      <label class="field"><span>Describe the scene <em>(optional)</em></span>
+        <textarea id="scene" rows="2" maxlength="400" placeholder="e.g. A lone cabin at dusk beside a still mountain lake"></textarea></label>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="step">2</span><h2>Direct the camera</h2></div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" role="tab" data-tab="moves" aria-selected="true">Camera move</button>
+        <button class="tab" role="tab" data-tab="angle" aria-selected="false">Re-shoot angle</button>
+      </div>
+      <div id="tab-moves" class="tabpane">
+        <div class="cats" id="cats"></div>
+        <div id="moves" class="moves" role="listbox" aria-label="Camera moves"></div>
+        <div class="chips-block">
+          <div class="chips-row"><span class="chips-label">Lens</span><div class="chips" id="lensChips"></div></div>
+          <div class="chips-row"><span class="chips-label">Mood</span><div class="chips" id="moodChips"></div></div>
+          <div class="chips-row"><span class="chips-label">Length</span><div class="chips" id="durChips"></div></div>
+          <div class="chips-row"><span class="chips-label">Size</span><div class="chips" id="resChips"></div></div>
+        </div>
+      </div>
+      <div id="tab-angle" class="tabpane hidden">
+        <p class="hint">Move the virtual camera around the subject. Open-weights engines use the Qwen multi-angle LoRA vocabulary below.</p>
+        <div class="angle-wrap">
+          <svg id="dial" viewBox="0 0 240 240" class="dial" role="slider" aria-label="Camera azimuth" tabindex="0">
+            <circle cx="120" cy="120" r="92" class="dial-ring"/>
+            <g id="dialTicks"></g>
+            <circle cx="120" cy="120" r="9" class="dial-subject"/>
+            <text x="120" y="108" class="dial-label" text-anchor="middle">SUBJECT</text>
+            <line id="dialLine" x1="120" y1="120" x2="120" y2="212" class="dial-line"/>
+            <g id="dialCam" class="dial-cam"><circle r="15"/><path d="M-6 -4h9v8h-9zM3 -2l5 -3v10l-5 -3z"/></g>
+          </svg>
+          <div class="angle-ctrl">
+            <label class="field"><span>Elevation</span>
+              <input id="elev" type="range" min="-30" max="60" step="30" value="0" list="elevTicks">
+              <datalist id="elevTicks"><option value="-30"></option><option value="0"></option><option value="30"></option><option value="60"></option></datalist>
+              <div class="range-labels"><span>low</span><span>eye</span><span>high</span><span>top</span></div></label>
+            <div class="field"><span>Distance</span><div class="chips" id="distChips"></div></div>
+            <code id="anglePrompt" class="prompt-code"></code>
+          </div>
+        </div>
+        <div class="row">
+          <button id="previewAngle" class="btn">Preview angle</button>
+          <label class="check"><input type="checkbox" id="useAngle"> Use this angle for the shot</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="step">3</span><h2>Engine</h2></div>
+      <div id="engines" class="engines" role="radiogroup" aria-label="Engine"></div>
+      <label id="modelRow" class="field hidden"><span>Router model</span><select id="modelSel"></select></label>
+      <div id="estimate" class="estimate" aria-live="polite"></div>
+      <button id="go" class="btn btn-primary btn-big" disabled>Generate shot</button>
+    </div>
+  </section>
+
+  <!-- CENTER: stage -->
+  <section class="pane center" aria-label="Stage">
+    <div class="stage-bar">
+      <div class="seg" id="abSeg" role="group" aria-label="A/B view">
+        <button data-view="still" class="on">Still</button><button data-view="split">Split</button><button data-view="video">Video</button>
+      </div>
+      <div class="stage-title" id="stageTitle">No shot yet</div>
+      <span id="simBadge" class="sim-badge hidden" title="This output was produced by the Demo engine, not by a generative model">Demo fixture: simulated camera move, not model output</span>
+    </div>
+    <div class="stage" id="stage">
+      <div id="empty" class="empty">
+        <svg viewBox="0 0 120 80" width="120"><rect x="4" y="4" width="112" height="72" rx="8" fill="none" stroke="#2c3242" stroke-width="2" stroke-dasharray="6 6"/><path d="M40 52l14-18 11 14 8-9 12 13z" fill="#2c3242"/><circle cx="46" cy="28" r="5" fill="#2c3242"/></svg>
+        <h3>Start with one frame</h3>
+        <p>Pick a sample or drop your own image on the left, choose a camera move, then hit <b>Generate shot</b>.</p>
+      </div>
+      <img id="stillImg" class="layer hidden" alt="Source still">
+      <video id="vid" class="layer hidden" loop muted playsinline controls></video>
+      <div id="wipeWrap" class="wipe hidden"><input id="wipe" type="range" min="0" max="100" value="50" aria-label="Wipe between still and video"></div>
+      <div id="progress" class="progress hidden" aria-live="polite">
+        <div class="bar"><i id="bar"></i></div>
+        <div id="progMsg" class="prog-msg">Starting…</div>
+        <ul id="log" class="log"></ul>
+      </div>
+      <div id="errorBox" class="errorbox hidden" role="alert"></div>
+    </div>
+    <div class="actions" id="actions">
+      <button class="btn" id="addTl" disabled>+ Add to timeline</button>
+      <a class="btn" id="dlVideo" download hidden>Download video</a>
+      <a class="btn" id="dlRecipe" download hidden>Download recipe.json</a>
+      <button class="btn" id="copyCaption">Copy share caption</button>
+      <span id="toast" class="toast" role="status"></span>
+    </div>
+  </section>
+
+  <!-- RIGHT: board -->
+  <section class="pane right" aria-label="Shot board">
+    <div class="card">
+      <div class="card-h"><span class="step">4</span><h2>Coverage board</h2>
+        <button id="getCov" class="btn btn-sm" disabled>Get coverage</button></div>
+      <p class="hint">Six angles from one frame: wide, medium, close-up, low, high and profile.</p>
+      <div id="cov" class="cov"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="step">5</span><h2>Sequence timeline</h2></div>
+      <ol id="timeline" class="timeline" aria-label="Timeline (drag to reorder)"></ol>
+      <div id="tlEmpty" class="hint">Add generated shots here, drag to reorder, then export one cut.</div>
+      <div class="row">
+        <label class="check"><input type="checkbox" id="xfade" checked> 0.4 s crossfades</label>
+        <button id="exportSeq" class="btn btn-primary" disabled>Export sequence</button>
+      </div>
+      <div id="seqOut" class="seq-out hidden">
+        <video id="seqVid" controls loop muted playsinline></video>
+        <div class="row"><a id="seqDl" class="btn btn-sm" download>Download mp4</a><a id="seqRecipe" class="btn btn-sm" download>recipe.json</a></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Example outputs</h2></div>
+      <p id="galNote" class="hint warn">SIM = placeholders: simulated depth-parallax camera moves on generated art. Not model output.</p>
+      <p id="galReal" class="hint real-note"></p>
+      <div id="gallery" class="gallery"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span id="footStatus"></span>
+  <span>Built on the Comfy Developer Platform: Comfy SDK · Router · workflows. Presets are plain JSON (<code>presets/</code>).</span>
+</footer>
+
+<dialog id="confirm"><form method="dialog">
+  <h3>This run spends credits</h3><p id="confirmText"></p>
+  <menu><button value="cancel" class="btn">Cancel</button><button value="ok" class="btn btn-primary">Run it</button></menu>
+</form></dialog>
+
+<script src="/static/app.js" defer></script>
+</body>
+</html>

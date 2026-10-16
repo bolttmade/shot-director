@@ -1,0 +1,16 @@
+{
+  "model": "LTX-2.3 (Comfy Cloud template 'LTX-2.3: Image to Video')",
+  "model_label": "LTX-2.3",
+  "platform": "Comfy Cloud",
+  "template": "LTX-2.3: Image to Video",
+  "template_version_note": "whatever the template browser/node shows, or 'unknown'",
+  "date": "2026-10-17",
+  "seed": 20261016,
+  "resolution": "1280x720",
+  "duration": 5,
+  "fps": 25,
+  "prompt": "paste the exact prompt used",
+  "settings": "anything else you changed, or 'defaults'",
+  "credits_used": 0,
+  "notes": "e.g. free run 1 of 5; Enable Prompt Enhance was off"
+}

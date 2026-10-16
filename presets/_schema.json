@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/shot-director/preset.schema.json",
+  "title": "Shot Director camera-move preset",
+  "description": "A camera move as plain data: one named move, mapped to every engine.",
+  "type": "object",
+  "required": ["id", "name", "category", "prompt_template", "duration", "engines", "virtual_camera"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 40},
+    "category": {"enum": ["dolly", "jib", "orbit", "special", "static"]},
+    "description": {"type": "string", "maxLength": 140},
+    "prompt_template": {"type": "string", "minLength": 10, "description": "May use {scene}, {lens}, {mood}."},
+    "negative": {"type": "string"},
+    "duration": {"type": "integer", "minimum": 2, "maximum": 10},
+    "lora": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["name", "strength"],
+          "additionalProperties": false,
+          "properties": {
+            "name": {"type": "string", "pattern": "\\.safetensors$"},
+            "strength": {"type": "number", "minimum": 0, "maximum": 2},
+            "source": {"type": "string"}
+          }
+        }
+      ]
+    },
+    "virtual_camera": {
+      "description": "Camera path used ONLY by the Demo engine (simulated parallax). Metres / degrees; see app/vcam.py.",
+      "type": "object",
+      "required": ["keys"],
+      "additionalProperties": false,
+      "properties": {
+        "keys": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["t"],
+            "additionalProperties": false,
+            "properties": {
+              "t": {"type": "number", "minimum": 0, "maximum": 1},
+              "right": {"type": "number"}, "up": {"type": "number"}, "forward": {"type": "number"},
+              "yaw": {"type": "number"}, "pitch": {"type": "number"}, "roll": {"type": "number"},
+              "zoom": {"type": "number", "exclusiveMinimum": 0}
+            }
+          }
+        },
+        "ease": {"enum": ["linear", "inout", "in", "out", "snap"]},
+        "shake": {"type": "number", "minimum": 0, "maximum": 3},
+        "motion_blur": {"type": "integer", "minimum": 0, "maximum": 8},
+        "rack": {"type": "object", "required": ["from", "to"], "properties": {"from": {"type": "number"}, "to": {"type": "number"}}},
+        "seed": {"type": "integer"}
+      }
+    },
+    "engines": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workflow": {
+          "type": "object",
+          "required": ["workflow"],
+          "additionalProperties": false,
+          "properties": {
+            "workflow": {"type": "string", "description": "File stem in workflows/"},
+            "params": {"type": "object"}
+          }
+        },
+        "router": {
+          "type": "object",
+          "required": ["model"],
+          "additionalProperties": false,
+          "properties": {
+            "model": {"type": "string", "pattern": "^[a-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+            "alternates": {"type": "array", "items": {"type": "string"}},
+            "body_overrides": {"type": "object"}
+          }
+        }
+      }
+    }
+  }
+}

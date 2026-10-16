@@ -1,0 +1,42 @@
+{
+  "$schema": "./_schema.json",
+  "id": "orbit-left",
+  "name": "Orbit Left",
+  "category": "orbit",
+  "description": "Camera circles the subject, travelling left.",
+  "prompt_template": "{scene} The camera orbits slowly to the left around the subject, keeping it centred while the background shifts with strong parallax. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": null,
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 1,
+        "right": -1.0,
+        "yaw": 5.5,
+        "forward": 0.25
+      }
+    ],
+    "ease": "inout"
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 0.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}

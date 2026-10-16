@@ -1,0 +1,50 @@
+{
+  "$schema": "./_schema.json",
+  "id": "arc",
+  "name": "Arc Shot",
+  "category": "orbit",
+  "description": "Shallow arc with a slight rise: cinematic reveal.",
+  "prompt_template": "{scene} The camera arcs gracefully around the subject, rising a little as it travels, creating a cinematic reveal with layered parallax. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": null,
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 0.5,
+        "right": 0.45,
+        "up": 0.2,
+        "yaw": -2.0,
+        "forward": 0.25
+      },
+      {
+        "t": 1,
+        "right": 0.9,
+        "up": 0.45,
+        "yaw": -4.0,
+        "forward": 0.45
+      }
+    ],
+    "ease": "inout"
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 0.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}

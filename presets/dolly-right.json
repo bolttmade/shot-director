@@ -1,0 +1,45 @@
+{
+  "$schema": "./_schema.json",
+  "id": "dolly-right",
+  "name": "Dolly Right",
+  "category": "dolly",
+  "description": "Camera tracks sideways to the right.",
+  "prompt_template": "{scene} The camera tracks smoothly to the right on a dolly, foreground elements sliding left across the frame faster than the distant background. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": {
+    "name": "ltx-2-19b-lora-camera-control-dolly-right.safetensors",
+    "strength": 1.0,
+    "source": "Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Right"
+  },
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 1,
+        "right": 0.9,
+        "yaw": -1.5
+      }
+    ],
+    "ease": "inout"
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 1.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}

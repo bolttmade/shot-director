@@ -1,0 +1,38 @@
+{
+  "name": "qwen_edit_angle",
+  "status": "UNTESTED here; derived from the LoRA author's own ComfyUI workflow (fal/Qwen-Image-Edit-2511-Multiple-Angles-LoRA)",
+  "engine": "open-weights",
+  "output_node": "9",
+  "output_kind": "image",
+  "inputs": {
+    "image": [
+      [
+        "41",
+        "image"
+      ]
+    ],
+    "prompt": [
+      [
+        "112",
+        "prompt"
+      ]
+    ],
+    "seed": [
+      [
+        "106",
+        "seed"
+      ]
+    ],
+    "lora_strength": [
+      [
+        "109",
+        "strength_model"
+      ]
+    ]
+  },
+  "lora_nodes": [],
+  "rules": {
+    "prompt": "<sks> [azimuth] [elevation] [distance], see app/angles.py",
+    "grid": "8 azimuths x 4 elevations x 3 distances"
+  }
+}

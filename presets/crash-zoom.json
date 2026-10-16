@@ -1,0 +1,41 @@
+{
+  "$schema": "./_schema.json",
+  "id": "crash-zoom",
+  "name": "Crash Zoom",
+  "category": "special",
+  "description": "Sudden aggressive zoom with motion blur.",
+  "prompt_template": "{scene} A sudden crash zoom: the lens snaps rapidly in on the subject with motion blur, tightening the frame in an instant. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": null,
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 1,
+        "zoom": 2.0
+      }
+    ],
+    "ease": "snap",
+    "motion_blur": 3
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 0.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}

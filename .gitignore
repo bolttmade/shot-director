@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+/outputs/
+*.log
+.DS_Store
+node_modules/
+
+# real-clip originals (large)
+examples/real/_originals/

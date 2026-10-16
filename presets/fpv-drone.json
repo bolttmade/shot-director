@@ -1,0 +1,58 @@
+{
+  "$schema": "./_schema.json",
+  "id": "fpv-drone",
+  "name": "FPV Drone",
+  "category": "special",
+  "description": "Banked, swooping first-person flight.",
+  "prompt_template": "{scene} A fast FPV drone flight: the camera swoops forward through the scene, banking and diving with aggressive motion and a slight roll. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": null,
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 0.35,
+        "forward": 0.8,
+        "up": -0.2,
+        "roll": 4,
+        "yaw": 1.5
+      },
+      {
+        "t": 0.7,
+        "forward": 1.6,
+        "up": 0.2,
+        "roll": -5,
+        "yaw": -2.0
+      },
+      {
+        "t": 1,
+        "forward": 2.2,
+        "up": 0.1,
+        "roll": 2,
+        "yaw": 0.5
+      }
+    ],
+    "ease": "linear",
+    "shake": 0.5
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 0.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}

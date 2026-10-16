@@ -1,0 +1,59 @@
+{
+  "lens": [
+    {
+      "id": "24",
+      "label": "24 mm",
+      "text": "Shot on a wide 24mm lens with expansive perspective."
+    },
+    {
+      "id": "35",
+      "label": "35 mm",
+      "text": "Shot on a 35mm lens with natural cinematic perspective."
+    },
+    {
+      "id": "50",
+      "label": "50 mm",
+      "text": "Shot on a 50mm lens with a natural, undistorted look."
+    },
+    {
+      "id": "85",
+      "label": "85 mm",
+      "text": "Shot on an 85mm telephoto lens with compressed perspective and shallow depth of field."
+    }
+  ],
+  "mood": [
+    {
+      "id": "golden",
+      "label": "Golden hour",
+      "text": "Warm golden-hour light, soft glow."
+    },
+    {
+      "id": "noir",
+      "label": "Noir",
+      "text": "High-contrast noir lighting, deep shadows."
+    },
+    {
+      "id": "neon",
+      "label": "Neon",
+      "text": "Saturated neon glow, cyan and magenta highlights."
+    },
+    {
+      "id": "overcast",
+      "label": "Overcast",
+      "text": "Soft overcast light, muted palette."
+    },
+    {
+      "id": "dreamy",
+      "label": "Dreamy",
+      "text": "Dreamy haze, gentle bloom, pastel tones."
+    }
+  ],
+  "durations": [
+    3,
+    5
+  ],
+  "resolutions": [
+    "480p",
+    "720p"
+  ]
+}

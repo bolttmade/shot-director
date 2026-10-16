@@ -1,0 +1,30 @@
+{
+  "schema": "shot-director/recipe@1",
+  "app_version": "0.1.0",
+  "created": "2026-10-16T16:55:29+00:00",
+  "kind": "sequence",
+  "engine": "demo",
+  "model": "ffmpeg-xfade",
+  "simulated": true,
+  "provenance": "SIMULATED placeholder: depth-parallax virtual camera, not model output",
+  "source": {
+    "name": "4 simulated clips",
+    "sha256": null
+  },
+  "preset": null,
+  "prompt": "",
+  "negative": "",
+  "seed": 0,
+  "params": {
+    "clips": [
+      "alpine-dusk__dolly-in",
+      "neon-rooftops__orbit-left",
+      "desert-monolith__jib-up",
+      "glass-orbs__dolly-in"
+    ],
+    "crossfade_s": 0.4
+  },
+  "workflow_sha256": null,
+  "credits_used": null,
+  "note": "SIMULATED placeholder (depth-parallax virtual camera). Not generative-model output."
+}

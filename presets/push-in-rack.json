@@ -1,0 +1,44 @@
+{
+  "$schema": "./_schema.json",
+  "id": "push-in-rack",
+  "name": "Push-in + Rack Focus",
+  "category": "dolly",
+  "description": "Slow push while focus slides from foreground to background.",
+  "prompt_template": "{scene} A slow push-in while the focus racks smoothly from the foreground to the distant background, softening what was sharp and sharpening what was soft. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": null,
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 1,
+        "forward": 1.2
+      }
+    ],
+    "ease": "inout",
+    "rack": {
+      "from": 0.1,
+      "to": 0.75
+    }
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 0.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "shot-director/recipe@1",
+  "app_version": "0.1.0",
+  "created": "2026-10-16T16:55:23+00:00",
+  "kind": "coverage",
+  "engine": "demo",
+  "model": "vcam-depth-parallax",
+  "simulated": true,
+  "provenance": "SIMULATED placeholder: depth-parallax virtual camera, not model output",
+  "source": {
+    "name": "Neon Rooftops",
+    "sha256": "7275afcf8ab195e6fd818c17d6bce17439d51604e43f3582142573e6993b66bd"
+  },
+  "preset": null,
+  "prompt": "",
+  "negative": "",
+  "seed": 7,
+  "params": {
+    "shots": [
+      {
+        "id": "wide",
+        "label": "Wide",
+        "file": "coverage/neon-rooftops/wide.jpg",
+        "qwen_prompt": "<sks> front view eye-level shot wide shot"
+      },
+      {
+        "id": "medium",
+        "label": "Medium",
+        "file": "coverage/neon-rooftops/medium.jpg",
+        "qwen_prompt": "<sks> front view eye-level shot medium shot"
+      },
+      {
+        "id": "close",
+        "label": "Close-up",
+        "file": "coverage/neon-rooftops/close.jpg",
+        "qwen_prompt": "<sks> front view eye-level shot close-up"
+      },
+      {
+        "id": "low",
+        "label": "Low angle",
+        "file": "coverage/neon-rooftops/low.jpg",
+        "qwen_prompt": "<sks> front view low-angle shot medium shot"
+      },
+      {
+        "id": "high",
+        "label": "High angle",
+        "file": "coverage/neon-rooftops/high.jpg",
+        "qwen_prompt": "<sks> front view high-angle shot medium shot"
+      },
+      {
+        "id": "profile",
+        "label": "Over-shoulder / profile",
+        "file": "coverage/neon-rooftops/profile.jpg",
+        "qwen_prompt": "<sks> front-right quarter view eye-level shot medium shot"
+      }
+    ]
+  },
+  "workflow_sha256": null,
+  "credits_used": 0.0,
+  "note": "SIMULATED placeholder (depth-parallax virtual camera). Not generative-model output."
+}

@@ -1,0 +1,114 @@
+{
+  "name": "ltx2_i2v_camera",
+  "status": "UNTESTED (no GPU on the dev box). Assembled from the official LTX-2_I2V_Full_wLora example; see workflows/README.md",
+  "engine": "open-weights",
+  "core_video_model": "LTX-2 19B (Lightricks)",
+  "output_node": "40",
+  "output_kind": "video",
+  "inputs": {
+    "image": [
+      [
+        "4",
+        "image"
+      ]
+    ],
+    "prompt": [
+      [
+        "8",
+        "text"
+      ]
+    ],
+    "negative": [
+      [
+        "9",
+        "text"
+      ]
+    ],
+    "seed": [
+      [
+        "24",
+        "noise_seed"
+      ],
+      [
+        "33",
+        "noise_seed"
+      ]
+    ],
+    "width": [
+      [
+        "12",
+        "width"
+      ]
+    ],
+    "height": [
+      [
+        "12",
+        "height"
+      ]
+    ],
+    "frames": [
+      [
+        "20",
+        "value"
+      ]
+    ],
+    "fps": [
+      [
+        "10",
+        "frame_rate"
+      ],
+      [
+        "18",
+        "frame_rate"
+      ],
+      [
+        "39",
+        "fps"
+      ]
+    ],
+    "lora_name": [
+      [
+        "5",
+        "lora_name"
+      ],
+      [
+        "7",
+        "lora_name"
+      ]
+    ],
+    "lora_strength": [
+      [
+        "5",
+        "strength_model"
+      ],
+      [
+        "7",
+        "strength_model"
+      ]
+    ],
+    "cfg": [
+      [
+        "22",
+        "cfg"
+      ]
+    ]
+  },
+  "lora_nodes": [
+    "5",
+    "7"
+  ],
+  "rules": {
+    "frames": "8n+1 (121 = 5 s @ 24 fps)",
+    "size": "width/height divisible by 64",
+    "resolutions": {
+      "480p": [
+        768,
+        448
+      ],
+      "720p": [
+        1280,
+        704
+      ]
+    }
+  }
+}

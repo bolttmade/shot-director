@@ -1,0 +1,61 @@
+{
+  "schema": "shot-director/recipe@1",
+  "app_version": "0.1.0",
+  "created": "2026-10-16T16:55:21+00:00",
+  "kind": "coverage",
+  "engine": "demo",
+  "model": "vcam-depth-parallax",
+  "simulated": true,
+  "provenance": "SIMULATED placeholder: depth-parallax virtual camera, not model output",
+  "source": {
+    "name": "Alpine Dusk",
+    "sha256": "dd28c56ffc5d71bbf8fcf644329e2ecbbd18630aeb7b54b09a61427633cf32d3"
+  },
+  "preset": null,
+  "prompt": "",
+  "negative": "",
+  "seed": 7,
+  "params": {
+    "shots": [
+      {
+        "id": "wide",
+        "label": "Wide",
+        "file": "coverage/alpine-dusk/wide.jpg",
+        "qwen_prompt": "<sks> front view eye-level shot wide shot"
+      },
+      {
+        "id": "medium",
+        "label": "Medium",
+        "file": "coverage/alpine-dusk/medium.jpg",
+        "qwen_prompt": "<sks> front view eye-level shot medium shot"
+      },
+      {
+        "id": "close",
+        "label": "Close-up",
+        "file": "coverage/alpine-dusk/close.jpg",
+        "qwen_prompt": "<sks> front view eye-level shot close-up"
+      },
+      {
+        "id": "low",
+        "label": "Low angle",
+        "file": "coverage/alpine-dusk/low.jpg",
+        "qwen_prompt": "<sks> front view low-angle shot medium shot"
+      },
+      {
+        "id": "high",
+        "label": "High angle",
+        "file": "coverage/alpine-dusk/high.jpg",
+        "qwen_prompt": "<sks> front view high-angle shot medium shot"
+      },
+      {
+        "id": "profile",
+        "label": "Over-shoulder / profile",
+        "file": "coverage/alpine-dusk/profile.jpg",
+        "qwen_prompt": "<sks> front-right quarter view eye-level shot medium shot"
+      }
+    ]
+  },
+  "workflow_sha256": null,
+  "credits_used": 0.0,
+  "note": "SIMULATED placeholder (depth-parallax virtual camera). Not generative-model output."
+}

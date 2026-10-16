@@ -1,0 +1,44 @@
+{
+  "$schema": "./_schema.json",
+  "id": "dolly-in",
+  "name": "Dolly In",
+  "category": "dolly",
+  "description": "Camera glides straight toward the subject.",
+  "prompt_template": "{scene} The camera dollies in smoothly, pushing toward the heart of the frame as background layers slide past and fine details sharpen. {lens} {mood}",
+  "negative": "camera shake, jitter, warping, morphing, flicker, scene cut, text, watermark",
+  "duration": 5,
+  "lora": {
+    "name": "ltx-2-19b-lora-camera-control-dolly-in.safetensors",
+    "strength": 1.0,
+    "source": "Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In"
+  },
+  "virtual_camera": {
+    "keys": [
+      {
+        "t": 0
+      },
+      {
+        "t": 1,
+        "forward": 1.6
+      }
+    ],
+    "ease": "inout"
+  },
+  "engines": {
+    "workflow": {
+      "workflow": "ltx2_i2v_camera",
+      "params": {
+        "lora_strength": 1.0,
+        "cfg": 4.0
+      }
+    },
+    "router": {
+      "model": "minimax/minimax-h3",
+      "alternates": [
+        "byteplus/dreamina-seedance-2-5-260628",
+        "xai/grok-imagine-video-1.5-lite"
+      ],
+      "body_overrides": {}
+    }
+  }
+}
