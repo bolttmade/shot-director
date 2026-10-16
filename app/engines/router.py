@@ -40,17 +40,23 @@ IMAGE_MODEL = "bfl/flux-3-image"
 # Only used when /estimate is unavailable (403 not_enabled while it rolls out) so a cap can still be checked.
 STATIC_PRICE_USD_PER_S: dict[str, dict[str, float]] = {
     "minimax/minimax-h3": {"768P": 0.1287},
-    "xai/grok-imagine-video-1.5-lite": {"480p": 0.0286, "720p": 0.0429},
+    # Grok lite: published $0.0286/s (480p) and $0.0429/s (720p), but the balance fell by 48.28 credits for each 5 s 720p clip (5 runs, 2026-10-16),
+    # i.e. $0.0458/s, so the table carries the MEASURED rates (480p: one run, about 33 credits for 5 s, baseline uncertain).
+    "xai/grok-imagine-video-1.5-lite": {"480p": 0.0315, "720p": 0.0458},
     "ltx/ltx-2-5-fast": {"720p": 0.1287},
     "ltx/ltx-2-5-pro": {"720p": 0.1716},
+    # FLUX 3 Video is billed per GPU-second. Comfy's pricing UI showed about 51.29 credits/s at hd ($0.243/s), but the balance fell by only
+    # 226.3 credits for one 5 s hd clip (2026-10-16), i.e. $0.2145/s, so "hd" carries the MEASURED rate (one run). "fhd" is unmeasured.
+    "bfl/flux-3-video": {"hd": 0.2145, "fhd": 0.36},
 }
-STATIC_IMAGE_USD = 0.03  # generous per-still allowance for FLUX 3 edits (usage-based; typically cents)
+STATIC_IMAGE_USD = 0.0686  # FLUX 3 Image at 1K: measured 14.48 credits per still on 2026-10-16 (3 live runs); usage-based, so it may drift
 
 MODEL_INFO = {
     "minimax/minimax-h3": {"label": "MiniMax H3", "i2v": True, "min_s": 4},
     "byteplus/dreamina-seedance-2-5-260628": {"label": "Seedance 2.5", "i2v": True, "min_s": 4},
     "xai/grok-imagine-video-1.5-lite": {"label": "Grok Imagine 1.5 lite (cheapest)", "i2v": True, "min_s": 1},
     "ltx/ltx-2-5-fast": {"label": "LTX 2.5 Fast (text-to-video only)", "i2v": False, "min_s": 2},
+    "bfl/flux-3-video": {"label": "FLUX 3 Video (image-to-video, 5 s minimum)", "i2v": True, "min_s": 5},
 }
 
 
@@ -92,6 +98,13 @@ def build_video_body(model: str, *, prompt: str, image_url: str | None, duration
         body = {"prompt": prompt, "duration": dur, "aspect_ratio": "16:9", "resolution": "480p" if resolution == "480p" else "720p"}
         if image_url:
             body["image"] = {"type": "image_url", "url": image_url}
+    elif provider == "bfl":
+        # FLUX 3 Video: `mode` is required; i2v takes `keyframes` (raw base64 or http(s) URL, not a data: URL).
+        body = {"mode": "i2v" if image_url else "t2v", "prompt": prompt, "duration": min(max(dur, 5), 20), "aspect_ratio": "16:9", "resolution": "hd", "generate_audio": False}
+        if image_url:
+            body["keyframes"] = raw_base64(image_url)
+        if seed is not None:
+            notes.append("FLUX 3 Video has no seed field in the Router schema; the seed is not sent.")
     elif provider == "ltx":
         body = {"prompt": prompt, "duration": dur, "resolution": "1280x720", "fps": 24, "generate_audio": False}
         notes.append("LTX via Router is text-to-video only: your still is NOT used as the first frame. Use the Open-weights engine for LTX image-to-video.")
@@ -104,8 +117,17 @@ def build_video_body(model: str, *, prompt: str, image_url: str | None, duration
     return body, notes
 
 
-def build_image_body(*, prompt: str, image_url: str) -> dict[str, Any]:
-    return {"prompt": prompt, "images": [image_url], "aspect_ratio": "16:9", "resolution": "1k"}
+def raw_base64(data_url: str) -> str:
+    """BFL fields want a bare base64 string or an http(s) URL, not a `data:image/jpeg;base64,` URL."""
+    return data_url.split(",", 1)[1] if data_url.startswith("data:") and "," in data_url else data_url
+
+
+def build_image_body(*, prompt: str, image_url: str | None = None, aspect_ratio: str = "16:9", resolution: str = "1k") -> dict[str, Any]:
+    """FLUX 3 Image request. No image = text-to-image; one image = an edit of it (angle re-frame / coverage)."""
+    body: dict[str, Any] = {"prompt": prompt, "aspect_ratio": aspect_ratio, "resolution": resolution}
+    if image_url:
+        body["images"] = [raw_base64(image_url)]
+    return body
 
 
 def extract_media_url(doc: Any) -> str | None:
@@ -334,11 +356,22 @@ class RouterEngine(Engine):
         recipe = make_recipe(kind="shot", engine="router", model=model, source_name=req.source.name, source_sha256=sha256_file(req.source.path), preset_id=req.preset["id"], prompt=req.prompt, negative=req.preset.get("negative", ""), seed=req.seed, params={"duration": body.get("duration"), "resolution": body.get("resolution"), "notes": notes}, credits_used=est.credits, extra={"router_request_id": rid, "credits_used_is": "estimate (queued runs expose no X-Comfy-Credits-Used)"})
         return Result([Artifact("video", file, req.preset["name"], {"model": model})], recipe, est.credits)
 
+    def generate_still(self, prompt: str, out_dir: Path, emit: Emit | None = None, *, stem: str = "still", model: str | None = None, aspect_ratio: str = "16:9", resolution: str = "1k") -> tuple[Path, dict[str, Any]]:
+        """Text-to-image through the Router (FLUX 3 Image by default): estimate, cap check, ONE submit, download. Returns (file, info)."""
+        emit = emit or (lambda ev: None)
+        model = model or IMAGE_MODEL
+        body = build_image_body(prompt=prompt, aspect_ratio=aspect_ratio, resolution=resolution)
+        est = self.estimate_body(model, body, seconds=0, resolution=resolution, image=True)
+        emit({"type": "estimate", "estimate": est.to_dict()})
+        self._guard(est)
+        file, rid = self._run_model(model, body, emit, out_dir / stem, ".jpg")
+        return file, {"router_request_id": rid, "model": model, "credits_estimate": est.credits, "body": {k: v for k, v in body.items() if k != "images"}}
+
     def reframe(self, req: ReframeRequest, emit: Emit, out_dir: Path) -> Result:
         est = self.estimate("reframe", req)
         emit({"type": "estimate", "estimate": est.to_dict()})
         self._guard(est)
-        prompt = f"Re-shoot this exact scene from a different camera position: {angles.describe(req.angle)}. Keep the same subject, style, lighting and colours."
+        prompt = f"Re-shoot this exact scene from a different camera position: {angles.natural_prompt(req.angle)}. Keep the same subject, location, style, lighting and colours; only the camera moves."
         body = build_image_body(prompt=prompt, image_url=image_data_url(req.source.path))
         file, rid = self._run_model(req.model or IMAGE_MODEL, body, emit, out_dir / "reframe", ".jpg")
         recipe = make_recipe(kind="reframe", engine="router", model=req.model or IMAGE_MODEL, source_name=req.source.name, source_sha256=sha256_file(req.source.path), prompt=prompt, seed=req.seed, params={"angle": vars(req.angle)}, credits_used=est.credits, extra={"router_request_id": rid})
@@ -349,11 +382,15 @@ class RouterEngine(Engine):
         emit({"type": "estimate", "estimate": est.to_dict()})
         self._guard(est)
         arts: list[Artifact] = []
+        rids: dict[str, str | None] = {}
+        prompts: dict[str, str] = {}
         data = image_data_url(req.source.path)
         for i, shot in enumerate(angles.COVERAGE):
-            prompt = f"Re-shoot this exact scene as a {angles.describe(shot['angle'])}. Keep the same subject, style, lighting and colours."
-            file, _rid = self._run_model(req.model or IMAGE_MODEL, build_image_body(prompt=prompt, image_url=data), emit, out_dir / f"coverage-{shot['id']}", ".jpg")
-            arts.append(Artifact("image", file, shot["label"], {"shot": shot["id"]}))
+            prompt = f"Re-shoot this exact scene from a different camera position ({shot['label']}): {angles.natural_prompt(shot['angle'])}. Keep the same subject, location, style, lighting and colours; only the camera moves."
+            file, rid = self._run_model(req.model or IMAGE_MODEL, build_image_body(prompt=prompt, image_url=data), emit, out_dir / f"coverage-{shot['id']}", ".jpg")
+            rids[shot["id"]] = rid
+            prompts[shot["id"]] = prompt
+            arts.append(Artifact("image", file, shot["label"], {"shot": shot["id"], "router_request_id": rid}))
             emit({"type": "progress", "value": (i + 1) / 6, "message": f"Coverage: {shot['label']}"})
-        recipe = make_recipe(kind="coverage", engine="router", model=req.model or IMAGE_MODEL, source_name=req.source.name, source_sha256=sha256_file(req.source.path), seed=req.seed, params={"shots": [s["id"] for s in angles.COVERAGE]}, credits_used=est.credits)
+        recipe = make_recipe(kind="coverage", engine="router", model=req.model or IMAGE_MODEL, source_name=req.source.name, source_sha256=sha256_file(req.source.path), seed=req.seed, params={"shots": [s["id"] for s in angles.COVERAGE]}, credits_used=est.credits, extra={"router_request_ids": rids, "prompts": prompts})
         return Result(arts, recipe, est.credits)

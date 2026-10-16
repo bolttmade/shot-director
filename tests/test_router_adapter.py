@@ -183,3 +183,41 @@ def test_seedance_first_frame_omits_ratio_and_text_only_keeps_it():
     assert b["content"][1]["role"] == "first_frame" and any("ratio" in x for x in n)
     t, _ = R.build_video_body(sd, prompt="p", image_url=None, duration=5, resolution="720p")
     assert t["ratio"] == "16:9"
+
+
+# ---- FLUX 3 on the Router (live-verified shapes: raw base64 images, text-to-image without `images`, `mode` for video) ----
+def test_flux_image_bodies_use_raw_base64_not_data_urls():
+    t2i = R.build_image_body(prompt="a cabin")
+    assert "images" not in t2i and t2i["resolution"] == "1k" and t2i["aspect_ratio"] == "16:9"
+    edit = R.build_image_body(prompt="x", image_url="data:image/jpeg;base64,QUJD")
+    assert edit["images"] == ["QUJD"]
+
+
+def test_flux3_video_body_is_i2v_with_keyframes_and_no_audio():
+    body, notes = R.build_video_body("bfl/flux-3-video", prompt="p", image_url="data:image/jpeg;base64,QUJD", duration=2, resolution="720p", seed=7)
+    assert body["mode"] == "i2v" and body["keyframes"] == "QUJD" and body["duration"] == 5 and body["generate_audio"] is False and body["resolution"] == "hd"
+    assert any("no seed" in n for n in notes) and "seed" not in body
+
+
+def test_generate_still_is_text_to_image_capped_and_submits_once(tmp_path):
+    client = FakeClient(doc={"result": {"sample": "https://cdn.example/s.jpg"}})
+    eng = R.RouterEngine(client_factory=lambda: client, downloader=dl, cap=30.0)
+    f, info = eng.generate_still("a lighthouse", tmp_path, stem="x")
+    assert f.is_file() and len(client.submits) == 1
+    model, body = client.submits[0]
+    assert model == "bfl/flux-3-image" and "images" not in body and info["router_request_id"] == "req_123"
+    with pytest.raises(E.CapExceeded):
+        R.RouterEngine(client_factory=lambda: client, downloader=dl, cap=5.0).generate_still("again", tmp_path)
+    assert len(client.submits) == 1  # the refused one never reached the Router
+
+
+def test_coverage_runs_six_edits_with_natural_prompts_and_records_every_request_id(sample_source, tmp_path):
+    from app.types import CoverageRequest
+
+    client = FakeClient(doc={"result": {"sample": "https://cdn.example/s.jpg"}})
+    eng = R.RouterEngine(client_factory=lambda: client, downloader=dl, cap=100.0)
+    res = eng.coverage(CoverageRequest(sample_source), lambda e: None, tmp_path)
+    assert len(client.submits) == 6 and len(res.artifacts) == 6
+    assert all(m == "bfl/flux-3-image" and len(b["images"]) == 1 and not b["images"][0].startswith("data:") for m, b in client.submits)
+    assert "<sks>" not in client.submits[0][1]["prompt"] and "camera" in client.submits[0][1]["prompt"]
+    assert set(res.recipe["router_request_ids"]) == {"wide", "medium", "close", "low", "high", "profile"}

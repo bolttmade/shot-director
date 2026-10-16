@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""Live smoke test of the Router path, for someone with their own Comfy API key and credits. Not run by the authors.
+"""Live run of the Router path, for someone with their own Comfy API key and credits. The authors ran it live (see docs/COSTS.md).
 
     COMFY_API_KEY=... python scripts/smoke_real.py --dry-run     # estimate only: nothing is submitted
     COMFY_API_KEY=... python scripts/smoke_real.py               # estimate, ask for confirmation, ONE tiny request
 
 What it does, in this order (the same guard the app uses):
-  1. Builds the cheapest sensible request: the `alley` frame, the `dolly-in` preset, Grok Imagine 1.5 lite, 480p, 2 s.
+  1. Builds the cheapest sensible request: the `alley` frame, the `dolly-in` preset, Grok Imagine 1.5 lite, 480p, 2 s
+     (any sample frame, preset, model, scene text and resolution can be chosen with the flags below).
   2. Asks the Router for a price (`/estimate`); falls back to the static table and says so. An unknown price is refused.
   3. Refuses if the estimate is over the cap (`--max-credits`, default min(MAX_CREDITS_PER_RUN, 10)).
   4. Prints the model, estimate and cap and asks you to type `yes` (or pass `--yes`).
   5. Submits exactly ONCE. It never retries a submit (a retry could be billed twice); on any error it stops and prints it.
   6. Saves the clip and its recipe.json under outputs/smoke/ (the recipe says simulated=false and names the model).
+
+With --report FILE it also reads your Comfy credit balance (read-only GET /customers/balance) before and after the run and writes
+a small JSON report (model, estimate, request id, balance difference in credits). Nothing secret goes in it.
 
 The key is read from the environment only; it is never printed or written to a file.
 """
@@ -18,6 +22,7 @@ The key is read from the environment only; it is never printed or written to a f
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from pathlib import Path
@@ -26,6 +31,18 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 DEFAULT_MODEL = "xai/grok-imagine-video-1.5-lite"
+CREDITS_PER_USD = 211.0
+
+
+def read_balance_cents(base: str = "https://api.comfy.org") -> float | None:
+    """Read-only: the workspace's prepaid balance in US cents, or None if it cannot be read. Never raises, never logs the key."""
+    import httpx
+
+    try:
+        r = httpx.get(f"{base}/customers/balance", headers={"X-API-Key": os.environ.get("COMFY_API_KEY", "").strip()}, timeout=15.0)
+        return float(r.json().get("effective_balance_cents")) if r.status_code == 200 else None
+    except (httpx.HTTPError, ValueError, TypeError):
+        return None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,6 +53,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--duration", type=int, default=2, help="seconds (model minimums apply)")
     ap.add_argument("--resolution", choices=["480p", "720p"], default="480p")
     ap.add_argument("--max-credits", type=float, default=None, help="hard cap for this run (default min(MAX_CREDITS_PER_RUN, 10))")
+    ap.add_argument("--scene", default="", help="optional scene sentence put into the preset's prompt template")
+    ap.add_argument("--report", type=Path, default=None, help="write a JSON report (estimate, request id, balance before/after) to this file")
     ap.add_argument("--dry-run", action="store_true", help="estimate only; submit nothing")
     ap.add_argument("--yes", action="store_true", help="skip the interactive confirmation (the cap still applies)")
     ap.add_argument("--out", type=Path, default=ROOT / "outputs" / "smoke")
@@ -65,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     eng = RouterEngine(cap=cap)
-    req = ShotRequest(source=source, preset=preset, duration=a.duration, resolution=a.resolution, model=a.model, prompt=build_prompt(preset))
+    req = ShotRequest(source=source, preset=preset, duration=a.duration, resolution=a.resolution, model=a.model, prompt=build_prompt(preset, scene=a.scene))
     est = eng.estimate("shot", req)
     cost = "unknown" if est.credits is None else f"{est.credits:g} credits" + (f" (~${est.usd:.3f})" if est.usd is not None else "")
     print(f"model      : {a.model}\nrequest    : {a.input} + {a.preset}, {a.duration}s @ {a.resolution}\nestimate   : {cost} ({'exact' if est.exact else 'estimate'})\ncap        : {cap:g} credits\nnote       : {est.note or '-'}")
@@ -90,6 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         if msg:
             print("  ·", msg)
 
+    before = read_balance_cents() if a.report else None
     try:
         res = eng.run_shot(req, emit, a.out)   # one submit; the engine and this script never retry it
     except Exception as e:  # noqa: BLE001  (print and stop: no retry)
@@ -97,6 +117,15 @@ def main(argv: list[str] | None = None) -> int:
         return 4
     for art in res.artifacts:
         print("saved:", art.path)
+    if a.report:
+        after = read_balance_cents()
+        delta = round((before - after) * CREDITS_PER_USD / 100, 2) if before is not None and after is not None else None
+        report = {"model": a.model, "input": a.input, "preset": a.preset, "duration_s": a.duration, "resolution": a.resolution, "prompt": req.prompt, "estimate_credits": est.credits,
+                  "router_request_id": res.recipe.get("router_request_id"), "balance_cents_before": before, "balance_cents_after": after, "credits_by_balance": delta,
+                  "files": [str(x.path) for x in res.artifacts]}
+        a.report.parent.mkdir(parents=True, exist_ok=True)
+        a.report.write_text(json.dumps(report, indent=2))
+        print("balance (cents) before/after:", before, after, "| credits by balance:", delta)
     print("credits used:", res.credits_used if res.credits_used is not None else "unknown", "| recipe simulated =", res.recipe.get("simulated"))
     return 0
 

@@ -24,6 +24,17 @@ def qwen_prompt(a: Angle) -> str:
     return f"<sks> {AZIMUTHS[int(s.azimuth)]} {ELEVATIONS[int(s.elevation)]} {DISTANCES[s.distance]}"
 
 
+NATURAL_AZ = {0: "straight-on", 45: "from a three-quarter angle on the right", 90: "from the right side", 135: "from behind on the right", 180: "from behind", 225: "from behind on the left", 270: "from the left side", 315: "from a three-quarter angle on the left"}
+NATURAL_EL = {-30: "low camera angle looking up", 0: "camera at eye level", 30: "camera raised, looking slightly down", 60: "high camera angle looking down"}
+NATURAL_DIST = {"close": "close-up framing", "medium": "medium framing", "wide": "wide framing pulled back to show more of the surroundings"}
+
+
+def natural_prompt(a: Angle) -> str:
+    """The same angle grid in plain English, for image-edit models that were not trained on the <sks> vocabulary (FLUX 3 via the Router)."""
+    s = snap_angle(a)
+    return f"{NATURAL_AZ[int(s.azimuth)]}, {NATURAL_EL[int(s.elevation)]}, {NATURAL_DIST[s.distance]}"
+
+
 def describe(a: Angle) -> str:
     return qwen_prompt(a).replace("<sks> ", "")
 
