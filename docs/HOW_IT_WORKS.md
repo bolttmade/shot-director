@@ -28,7 +28,7 @@ The server renders the prompt (`{scene}`, `{lens}`, `{mood}` slots), then hands 
 
 **Workflow** (`engines/workflow.py`). Loads `workflows/<name>.json` with `client.workflows.from_file`, uploads the still with `client.assets.from_file`, sets inputs by the node ids in `<name>.meta.json` (`wf.set_input`), removes the LoRA nodes if the move has none (`wf.remove_node`), calls `client.submit(wf)` once, streams `job.events()`, and downloads `job.get_outputs(node)` immediately. The same code targets a local `comfy-api-proxy` (`open`), Comfy Cloud, or a Comfy API deployment (`cloud`); the base URL decides. Re-framing runs the Qwen angle graph first and feeds that image to the video graph.
 
-**Router** (`engines/router.py`). Builds each provider's native request body, calls `POST /v2/models/{model}/estimate`, enforces the cap, then `client.models.submit` once and polls `handle.iter_events()`. Result URLs expire in 12-24 h, so the file is downloaded as soon as it appears.
+**Router** (`engines/router.py`). Builds each provider's native request body, tries `POST /v2/models/{model}/estimate` (not enabled for the workspace used here, so the labelled static price table was what ran), enforces the cap, then `client.models.submit` once and polls `handle.iter_events()`. Result URLs expire in 12-24 h, so the file is downloaded as soon as it appears. **Run live:** image-to-video with MiniMax H3, Grok lite and FLUX 3 Video, FLUX 3 text-to-image (`generate_still`), and FLUX 3 image edits for re-shoots and the six-shot coverage (one request per angle, each with its own request id in the recipe).
 
 ## Cost safety (Router and Cloud)
 
@@ -42,11 +42,11 @@ The server renders the prompt (`{scene}`, `{lens}`, `{mood}` slots), then hands 
 
 ## Re-shoot angles
 
-`app/angles.py` snaps the dial to the grid the Qwen *Multiple Angles* LoRA was trained on (8 azimuths x 4 elevations x 3 distances) and emits `<sks> front-right quarter view elevated shot close-up`. The Demo engine instead converts the same angle into a (clamped) virtual-camera pose.
+`app/angles.py` snaps the dial to the grid the Qwen *Multiple Angles* LoRA was trained on (8 azimuths x 4 elevations x 3 distances) and emits `<sks> front-right quarter view elevated shot close-up`. The Demo engine instead converts the same angle into a (clamped) virtual-camera pose. The Router engine sends a FLUX 3 Image edit with a natural-language camera prompt (`angles.natural_prompt`, e.g. "a low-angle shot from the front-right, close-up"), because FLUX does not know the `<sks>` grammar. Coverage runs six of those edits; the committed alley result is in `examples/real/coverage/alley/`, and the Demo engine replays it.
 
 ## Sequence
 
-`app/stitch.py` builds one ffmpeg command (`xfade` crossfades or `concat`), normalising size/fps. `build_command` is a pure function and is unit-tested without ffmpeg.
+`app/stitch.py` builds one ffmpeg command (`xfade` crossfades or `concat`), normalising size/fps. `build_command` is a pure function and is unit-tested without ffmpeg. **Make my reel** (`POST /api/reel`) reuses it: only the real clips on the timeline are cut together (simulated clips are skipped), with a burned-in "REAL: <model> via <platform>" label, once at 16:9 (1280x720, letterboxed) and once at 9:16 (720x1280, blurred-pad fit; nothing is outpainted). It spends no credits.
 
 ## Recipes
 
