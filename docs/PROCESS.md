@@ -62,7 +62,7 @@ Requests that ran, in time order (UTC dates all 2026-10-16; credits are balance 
 | 20 | `forest-cabin` + fpv-drone | MiniMax H3 | 135.78 |
 | 21 | `retro-diner` + arc | `bfl/flux-3-video` hd | 226.3 |
 
-Total about **1,310 credits (about $6.21)**; balance afterwards 379.09 cents (about 800 credits). One request per attempt; no retries; no 402; no failed Router call.
+Total about **1,310 credits (about $6.21)**; balance afterwards 371.94 cents (about 785 credits, after the 15-credit browser test of the static page). One request per attempt; no retries; no 402; no failed Router call.
 
 ### 2c. Coverage graph (FLUX 3 Image edits)
 
@@ -82,6 +82,10 @@ Each edit is a separate request with a natural-language camera prompt (`app/angl
 ### 2d. Make my reel (no credits)
 
 `POST /api/reel` takes the real clips from the timeline, scales and pads each to 16:9 (letterbox) or 9:16 (blurred pad), draws a "REAL: <model> via Comfy Router" label, and joins them with `xfade` crossfades in one ffmpeg run. Samples: [`examples/reels/`](../examples/reels/README.md).
+
+### 2e. Static Space build (no credits)
+
+`scripts/build_static.py` packs `static_site/` (plain HTML/JS, a WebGL depth-parallax shader for the free previs), `data.json` (real-clip notes, credits, request ids), 14 web-copy clips (720p max, H.264, no audio), the four stills with small depth maps and the six real coverage stills into `space/` (about 15 MB) with a Space README header (`sdk: static`, `license: mit`). Published to https://huggingface.co/spaces/BoltTmade/shot-director. Its optional own-key panel was tested once in headless Chrome (15.09 credits, request `d8674baa-a97f-4931-966b-eb6a43d22670`).
 
 ## 3. What did not run (so it is not claimed)
 

@@ -30,7 +30,7 @@ Never claim: camera-LoRA results (none exist), that the open-weights or Cloud en
 | 6 | 1:14 to 1:25 | Pick **Rainy Alley**, **Get coverage**: six tiles, green board badge. | REAL: FLUX 3 Image edits (alley coverage) | Coverage: six angles of the alley, real FLUX 3 Image edits, eighty-seven credits in total. The orbit that free LTX could not do, Grok lite managed. (26 words) | Green coverage badge; the stage clip keeps its own badge |
 | 7 | 1:25 to 1:36 | **+ All real clips**, then **Make my reel (16:9 + 9:16)**; play both outputs. | REAL clips only (ffmpeg cut, labelled) | Make my reel cuts the real clips into sixteen by nine and nine by sixteen, labelled with the model. No credits spent. (22 words) | Burned-in "REAL: model via Comfy Router" label |
 | 8 | 1:36 to 1:46 | `docs/COSTS.md` credit log for 3 s, then the engine list. | none | About thirteen hundred credits were spent in total, every request is logged. Open-weights and Cloud engines are contract-tested only. No camera LoRA result exists. (24 words) | No claim that open-weights or Cloud ran live |
-| 9 | 1:46 to 1:50 | End card: repo URL (and the Space URL once live), `#OpenSourceHiggsfield`. Hold at most 4 s. | none | Shot Director. Built for Open Source Higgsfield. (7 words) | Repo link github.com/bolttmade/shot-director |
+| 9 | 1:46 to 1:50 | End card: repo URL and the live Space URL (huggingface.co/spaces/BoltTmade/shot-director), `#OpenSourceHiggsfield`. Hold at most 4 s. | none | Shot Director. Built for Open Source Higgsfield. (7 words) | Repo link github.com/bolttmade/shot-director |
 
 Timings follow about 146 words per minute with short pauses; the cut ends at 1:50, leaving 10 s under the 2:00 limit. If the take runs long, cut beat 8 first, then beat 7.
 

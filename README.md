@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/bolttmade/shot-director/actions/workflows/ci.yml/badge.svg)](https://github.com/bolttmade/shot-director/actions/workflows/ci.yml)
 
-**Free previs, then one real render.** An open-source camera-move studio for Comfy workflows, built on the [Comfy Developer Platform](https://docs.comfy.org): pick a camera move and preview it for free with a simulated camera, then spend credits once on the real render from the model of your choice. Re-shoot the frame from another angle, get a six-shot coverage board, A/B the result against the still, and cut the real clips into a 16:9 or 9:16 reel. One UI, one preset format, four interchangeable engines (offline demo, open weights on your own GPU, Comfy Cloud, Comfy Router partner models).
+**Free previs, then one real render.** [**Try the live static demo on Hugging Face →**](https://huggingface.co/spaces/BoltTmade/shot-director) (no install, no keys). An open-source camera-move studio for Comfy workflows, built on the [Comfy Developer Platform](https://docs.comfy.org): pick a camera move and preview it for free with a simulated camera, then spend credits once on the real render from the model of your choice. Re-shoot the frame from another angle, get a six-shot coverage board, A/B the result against the still, and cut the real clips into a 16:9 or 9:16 reel. One UI, one preset format, four interchangeable engines (offline demo, open weights on your own GPU, Comfy Cloud, Comfy Router partner models).
 
 ![Shot Director: previs first, then the real MiniMax H3 render of the same still and move, green badge](docs/screenshots/01-real-render.webp)
 
@@ -13,6 +13,10 @@
 > * `DEMO=1` runs with **no keys, no GPU, no network**. In that mode everything that is not one of those real files is a **simulated depth-parallax camera move**, the free **previs**: badged amber ("Demo fixture: simulated camera move, not model output") and recorded as `"simulated": true`. It is a preview of the move, not a generated video.
 > * **Router: run live.** MiniMax H3, Grok lite, FLUX 3 Image (text-to-image and edits) and FLUX 3 Video all ran against the live API on 2026-10-16 (about 1,310 credits, about $6.21, every request logged with its request id in [docs/COSTS.md](docs/COSTS.md)). `/estimate` is **not enabled** for the workspace used, so the app priced runs with a static table (now set to the measured rates) and the real charge was read from the balance.
 > * The **open-weights** path (camera-LoRA graphs written for LTX-2 19B, not LTX-2.3; Qwen angle LoRA) and the Cloud adapter are implemented to the documented SDK contract and covered by contract tests with a fake client, but were **not run against a live server**. The ComfyUI graphs in `workflows/` are **UNTESTED**. No camera-LoRA result exists. See [Status](#status-what-is-verified-and-what-is-not).
+
+## Live demo (static Hugging Face Space)
+
+**https://huggingface.co/spaces/BoltTmade/shot-director** (direct app: https://bolttmade-shot-director.static.hf.space/). A free, backend-free build of the same idea: everything runs in your browser. **Client-side:** the in-browser previs (a simplified WebGL depth-parallax camera over the still, amber, simulated), the gallery of the 14 real clips (green; web copies re-encoded smaller, no audio, with their model, credits, rating and request id), the six real FLUX 3 coverage stills, and an optional **run it yourself** panel that calls `api.comfy.org` straight from your browser with a Comfy API key you paste (kept in memory only, never stored, one submit, capped and confirmed; spends your credits). **Not in the Space:** the server, the six-engine UI, the timeline and the reel export, the exact server-side virtual camera, any model. Rebuild it with `python scripts/build_static.py` (about 15 MB) and publish the `space/` folder.
 
 ## Run it in under five minutes (no keys)
 
@@ -148,9 +152,10 @@ app/            server.py (FastAPI + SSE), engines/ (base, fixtures, workflow, r
 presets/        camera moves as JSON (+ schema, lens/mood options)
 workflows/      ComfyUI API-format graphs + .meta.json node-id maps (UNTESTED, open-weights only)
 web/            index.html, app.js, style.css (no build step, no CDN)
+static_site/    the backend-free Space page (index.html, app.js with the WebGL previs, style.css)
 examples/       sample frames, simulated clips/stills, recipes, real/ (real clips + coverage), reels/ (sample exports), CREDITS.md
 docs/           HOW_IT_WORKS, ADDING_A_MOVE, COSTS (credit log), MODELS, REAL_RUN, PROCESS (graphs that ran), DEMO_*, screenshots
-scripts/        make_fixtures.py, build_workflows.py, check_open_weights.py, import_real.py, make_alley_depth.py, smoke_real.py, router_still.py, router_coverage.py, screenshots.py
+scripts/        build_static.py (static Space), make_fixtures.py, build_workflows.py, check_open_weights.py, import_real.py, make_alley_depth.py, smoke_real.py, router_still.py, router_coverage.py, screenshots.py
 tests/
 ```
 

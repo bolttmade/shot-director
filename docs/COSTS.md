@@ -67,10 +67,18 @@ Everything below happened on **2026-10-16** through the Comfy Router API with th
 |---|---|---|---|---|---|
 | `alley` coverage (6 stills) | FLUX 3 Image edits, 6 requests | 86.85 | 591.878 → 550.694 | **86.9** | wide `b45cf408-b7ee-4de1-b601-5658603c1b28`, medium `898192f6-ce15-45f6-84a0-d3315f019359`, close `417c4883-a63a-4e31-a14c-02f323dade03`, low `2f79329d-b4b9-40e5-ba85-2b45791acc0f`, high `5092db8d-5ed2-4212-926c-d4c460e11cb3`, profile `07804877-ce57-4fcd-bb97-048ce89960e3` |
 
+### Browser test of the Space's "run it yourself" panel
+
+| What | Model | Estimate | Balance (cents) | Measured credits | Request id |
+|---|---|---|---|---|---|
+| Static page, own-key panel, driven in headless Chrome (origin `http://127.0.0.1`), `forest-cabin` + dolly-in, 2 s | Grok lite 480p | 13.3 | 379.094 → 371.944 | **15.09** | `d8674baa-a97f-4931-966b-eb6a43d22670` |
+
+CORS from a browser origin works; one POST, status polls, one result read, no retry. A 2 s 480p clip cost 7.5 credits/s, above the 6.65/s of the 5 s runs, so very short Grok clips seem to carry a small minimum.
+
 ### Totals and balance
 
-* New spend in this round (stills + 10 clips + coverage): 43.4 + 678.9 (5 H3) + 193.1 (4 Grok) + 226.3 (FLUX 3 Video) + 86.9 = **1,228.7 credits** (about $5.82). Add the two earlier real clips (about 33 and 48.3) and the grand total of Router spend is about **1,310 credits (about $6.21)**.
-* **Balance now: 379.09 cents (about $3.79, about 800 credits)** from `GET https://api.comfy.org/customers/balance`, kept above the 200-credit floor. The $10 top-up was made earlier by the owner; no further card charge was made.
+* New spend in this round (stills + 10 clips + coverage): 43.4 + 678.9 (5 H3) + 193.1 (4 Grok) + 226.3 (FLUX 3 Video) + 86.9 = **1,228.7 credits** (about $5.82). Add the two earlier real clips (about 33 and 48.3) and the grand total of Router spend is about **1,310 credits (about $6.21)**, plus 15.1 credits for the browser test of the static page's own-key panel (about 1,325 in all).
+* **Balance now: 371.94 cents (about $3.72, about 785 credits)** from `GET https://api.comfy.org/customers/balance`, kept above the 200-credit floor. The $10 top-up was made earlier by the owner; no further card charge was made.
 * Every request above was submitted exactly once and never retried; no 402 and no failed Router call occurred (0 of the 3 allowed failures used).
 
 ### Estimate vs measured

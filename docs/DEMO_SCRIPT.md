@@ -30,6 +30,6 @@ See [DEMO_VIDEO_PLAN.md](DEMO_VIDEO_PLAN.md#a-shot-list-145) (nine beats, about 
 
 > Shot Director: free previs, then one real render. Preview a camera move free, render it once with MiniMax H3, Grok or FLUX 3 via Comfy Router, cut a 16:9 + 9:16 reel. 14 real clips, labelled; the rest simulated. https://github.com/bolttmade/shot-director #OpenSourceHiggsfield
 
-(Attach the demo video. Repo link: https://github.com/bolttmade/shot-director. The draft is 276 characters including the URL and the hashtag, so it fits 280 (X counts a URL as 23). "14 real clips" = 2 LTX-2.3 + 12 Router clips in `examples/real/`.)
+(Attach the demo video. Repo link: https://github.com/bolttmade/shot-director. Live static demo (free Hugging Face Space, nothing to install): https://huggingface.co/spaces/BoltTmade/shot-director , worth adding to the post or its reply if there is room: it does not fit in the 280 characters above. The draft is 276 characters including the URL and the hashtag, so it fits 280 (X counts a URL as 23). "14 real clips" = 2 LTX-2.3 + 12 Router clips in `examples/real/`.)
 
 Checks before posting: both badges are shown where they appear; the post does not say "camera LoRA" worked; the repo link works; the owner approves the post.
