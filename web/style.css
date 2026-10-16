@@ -176,3 +176,7 @@ dialog p{color:var(--muted);margin-top:8px}
 .g-tag.sim{background:#ffb340dd;color:#1b1306}.g-tag.real{background:#34d399;color:#04231a}
 .g-item.is-real{border-color:#34d399}
 .real-note{color:#5fd8ab}
+
+.callout{margin:10px 0 0;padding:10px 12px;border:1px solid #3a4258;border-radius:10px;background:#141824;font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.callout b{color:#ffb340}.callout.real b{color:#5fd8ab}
+.reel{margin-top:8px}.reel video{width:100%;border-radius:9px;background:#000;max-width:100%}

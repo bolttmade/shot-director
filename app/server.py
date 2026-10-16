@@ -84,6 +84,14 @@ class AdoptIn(BaseModel):
 class SequenceIn(BaseModel):
     clips: list[str] = Field(min_length=1, max_length=12)
     crossfade: float = Field(0.4, ge=0, le=1.5)
+    aspect: str | None = Field(None, pattern="^(16:9|9:16)$")
+    labels: bool = False  # burn a "REAL · model · platform" / "SIMULATED" label into every clip
+
+
+class ReelIn(BaseModel):
+    clips: list[str] = Field(min_length=1, max_length=12)
+    crossfade: float = Field(0.4, ge=0, le=1.5)
+    aspects: list[str] = Field(["16:9", "9:16"], min_length=1, max_length=2)
 
 
 def create_app() -> FastAPI:
@@ -204,7 +212,8 @@ def create_app() -> FastAPI:
                 f["url"] = f"/examples/outputs/{f['file']}"
         real_items = []
         for c in realmod.scan(S.real_dir):
-            real_items.append({"id": c.id, "kind": "clip", "input": c.input, "preset": c.preset, "variant": c.variant, "url": f"/examples/real/{c.path.name}", "recipe_url": f"/examples/real/{c.recipe_path.name}" if c.imported else None, "simulated": False, "real": True, "badge": c.badge, "imported": c.imported})
+            real_items.append({"id": c.id, "kind": "clip", "input": c.input, "preset": c.preset, "variant": c.variant, "url": f"/examples/real/{c.path.name}", "recipe_url": f"/examples/real/{c.recipe_path.name}" if c.imported else None, "simulated": False, "real": True, "badge": c.badge, "imported": c.imported, "model_label": c.notes.get("model_label") or realmod.DEFAULT_MODEL_LABEL, "platform": c.notes.get("platform") or realmod.DEFAULT_PLATFORM, "rating": c.notes.get("rating"), "credits_used": c.notes.get("credits_used")})
+        real_items.sort(key=lambda i: (-(i["rating"] or 0), i["id"]))  # best-rated real clips first
         data["items"] = real_items + data["items"]  # real clips first
         data["badges"] = {"simulated": "Demo fixture: simulated camera move, not model output"}
         return data
@@ -311,34 +320,53 @@ def create_app() -> FastAPI:
         return {"id": f"upload:{uid}", "url": f"/outputs/uploads/{uid}.jpg", "name": p.stem, "width": im.width, "height": im.height}
 
     # ------------------------------------------------------------------ sequence
-    @app.post("/api/sequence")
-    def make_sequence(b: SequenceIn) -> dict:
-        paths = [path_for(u) for u in b.clips]
+    def _is_sim(path: Path) -> bool:
+        rr = realmod.recipe_for_path(path, S.real_dir)
+        if rr is not None:
+            return bool(rr.get("simulated"))  # real clips are not simulated
+        if "examples" in path.parts:
+            return True  # every other committed example is a simulated placeholder
+        rp = path.parent / "recipe.json"
+        try:
+            return bool(json.loads(rp.read_text()).get("simulated")) if rp.is_file() else False
+        except (OSError, ValueError):
+            return False
+
+    def _label(path: Path) -> str:
+        if _is_sim(path):
+            return "SIMULATED previs: not model output"
+        rr = realmod.recipe_for_path(path, S.real_dir) or {}
+        n = rr.get("notes") or {}
+        return f"REAL: {n.get('model_label') or realmod.DEFAULT_MODEL_LABEL} via {rr.get('platform') or n.get('platform') or realmod.DEFAULT_PLATFORM}"
+
+    def _build_sequence(urls: list[str], crossfade: float, aspect: str | None, labels: bool) -> dict[str, Any]:
+        paths = [path_for(u) for u in urls]
         seq_id = uuid.uuid4().hex[:12]
         out = S.outputs_dir / "sequences" / f"{seq_id}.mp4"
         try:
-            stitch(paths, out, crossfade=b.crossfade)
+            stitch(paths, out, crossfade=crossfade, aspect=aspect, labels=[_label(p) for p in paths] if labels else None)
         except (StitchError, RuntimeError) as e:
             raise HTTPException(500, {"code": "stitch_failed", "message": str(e), "hint": "Is ffmpeg installed? (apt install ffmpeg / brew install ffmpeg)"}) from e
-        def _sim(path: Path) -> bool:
-            rr = realmod.recipe_for_path(path, S.real_dir)
-            if rr is not None:
-                return bool(rr.get("simulated"))  # real clips are not simulated
-            if "examples" in path.parts:
-                return True  # every other committed example is a simulated placeholder
-            rp = path.parent / "recipe.json"
-            try:
-                return bool(json.loads(rp.read_text()).get("simulated")) if rp.is_file() else False
-            except (OSError, ValueError):
-                return False
-
-        flags = [_sim(p) for p in paths]
+        flags = [_is_sim(p) for p in paths]
         simulated = any(flags)
         n_sim = sum(flags)
         prov = f"ffmpeg edit of {len(paths)} clip(s): {len(paths) - n_sim} real model output, {n_sim} SIMULATED placeholder" + (" (so the whole sequence must be presented as containing simulated footage)" if n_sim else "")
-        recipe = make_recipe(kind="sequence", engine="ffmpeg", model="ffmpeg-xfade" if b.crossfade else "ffmpeg-concat", source_name=f"{len(paths)} clips", source_sha256=None, simulated=simulated, params={"clips": b.clips, "crossfade_s": b.crossfade, "real_clips": len(paths) - n_sim, "simulated_clips": n_sim}, extra={"provenance": prov})
+        recipe = make_recipe(kind="sequence", engine="ffmpeg", model="ffmpeg-xfade" if crossfade else "ffmpeg-concat", source_name=f"{len(paths)} clips", source_sha256=None, simulated=simulated, params={"clips": urls, "crossfade_s": crossfade, "aspect": aspect or "source", "labels": labels, "real_clips": len(paths) - n_sim, "simulated_clips": n_sim}, extra={"provenance": prov})
         (out.parent / f"{seq_id}.recipe.json").write_text(json.dumps(recipe, indent=2))
-        return {"url": url_for(out), "recipe": recipe, "recipe_url": url_for(out.parent / f"{seq_id}.recipe.json")}
+        return {"url": url_for(out), "recipe": recipe, "recipe_url": url_for(out.parent / f"{seq_id}.recipe.json"), "aspect": aspect or "16:9"}
+
+    @app.post("/api/sequence")
+    def make_sequence(b: SequenceIn) -> dict:
+        return _build_sequence(b.clips, b.crossfade, b.aspect, b.labels)
+
+    @app.post("/api/reel")
+    def make_reel(b: ReelIn) -> dict:
+        """'Make my reel': the REAL clips among `clips`, cut together with a burned-in model label, once per aspect ratio. Simulated clips are skipped."""
+        real_urls = [u for u in b.clips if not _is_sim(path_for(u))]
+        if not real_urls:
+            raise HTTPException(422, {"code": "no_real_clips", "message": "A reel is made from real model clips and none of these are real.", "hint": "Add real (green) clips from the gallery to the timeline first."})
+        reels = [_build_sequence(real_urls, b.crossfade, a, True) for a in dict.fromkeys(b.aspects)]
+        return {"reels": reels, "skipped_simulated": len(b.clips) - len(real_urls)}
 
     # ------------------------------------------------------------------ static
     app.mount("/outputs", StaticFiles(directory=S.outputs_dir), name="outputs")

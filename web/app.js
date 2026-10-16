@@ -225,9 +225,25 @@ function updateActions() {
   $("#addTl").disabled = !vid;
   for (const [id, url] of [["#dlVideo", vid && vid.url], ["#dlRecipe", r && r.recipe_url]]) { const a = $(id); if (url) { a.href = url; a.hidden = false; } else a.hidden = true; }
   $("#go").disabled = S.busy || !S.source || (S.estimate && S.estimate.over_cap) || !S.estimate;
-  $("#go").textContent = S.busy ? "Working…" : "Generate shot";
+  const eng = S.engines.find(e => e.id === S.engineId);
+  $("#go").textContent = S.busy ? "Working…" : (!eng ? "Generate shot" : eng.kind === "demo" ? "Previs this shot (free)" : eng.kind === "router" || eng.kind === "cloud" ? "Render for real (credits)" : "Render on my GPU (free)");
+  renderNext();
   $("#getCov").disabled = S.busy || !S.source;
   $("#previewAngle").disabled = S.busy || !S.source;
+}
+
+/* "Free previs, then one real render": after a simulated previs, point at the real render of the same still + move (if one was made) or at the Router. */
+function renderNext() {
+  const box = $("#renderNext"); if (!box) return;
+  const r = S.result, src = S.samples.find(x => S.source && x.id === S.source.id);
+  box.className = "callout hidden"; box.replaceChildren();
+  if (!r || !r.simulated || !src) return;
+  const real = S.gallery.find(i => i.kind === "clip" && i.real && i.input === src.sample_id && i.preset === S.presetId);
+  const router = S.engines.find(e => e.kind === "router" && e.health.ok);
+  box.className = "callout" + (real ? " real" : "");
+  box.append(h("span", {}, h("b", {}, "Previsualised. "), real ? `Happy with this move? A real render of this exact still and move exists (${real.model_label} via ${real.platform}${real.credits_used != null ? `, ${Number(real.credits_used).toFixed(0)} credits` : ""}).` : "Happy with this move? Render it once for real; previs is free, the render spends credits."));
+  if (real) box.append(h("button", { class: "btn btn-sm", onclick: () => { setVideo(real.url); S.result = { artifacts: [{ kind: "video", url: real.url }], recipe_url: real.recipe_url, simulated: false, real: true, badge: real.badge, model_label: real.model_label, platform: real.platform }; S.view = "video"; applyView(); showSim(false, S.result); $("#stageTitle").textContent = `${(S.presets.find(p => p.id === S.presetId) || {}).name} · ${src.title} · real render`; updateActions(); } }, "Play the real render"));
+  else if (router) box.append(h("button", { class: "btn btn-sm", onclick: () => { pickEngine(router.id); toast("Router engine selected: check the estimate, then Render for real"); } }, "Use the Router engine"));
 }
 
 /* ---------- jobs ---------- */
@@ -311,6 +327,7 @@ function renderTimeline() {
   const ol = $("#timeline"); ol.replaceChildren();
   $("#tlEmpty").classList.toggle("hidden", S.timeline.length > 0);
   $("#exportSeq").disabled = S.timeline.length < 1;
+  $("#makeReel").disabled = !S.timeline.some(c => c.real);
   let dragI = null;
   S.timeline.forEach((c, i) => {
     const li = h("li", { class: "clip", draggable: "true",
@@ -336,22 +353,48 @@ async function exportSeq() {
   btn.textContent = "Export sequence"; btn.disabled = S.timeline.length < 1;
 }
 
+function addAllReal() {
+  const real = S.gallery.filter(i => i.kind === "clip" && i.real);
+  if (!real.length) { toast("No real clips in the gallery yet"); return; }
+  S.timeline = real.slice(0, 12).map(it => ({ url: it.url, label: ((S.presets.find(p => p.id === it.preset) || {}).name || it.preset), sim: false, real: true }));
+  renderTimeline(); toast(`${S.timeline.length} real clips on the timeline`);
+}
+async function makeReel() {
+  const btn = $("#makeReel"); const old = btn.textContent; btn.disabled = true; btn.textContent = "Cutting both reels…";
+  try {
+    const r = await api("/api/reel", { json: { clips: S.timeline.map(c => c.url), crossfade: $("#xfade").checked ? 0.4 : 0, aspects: ["16:9", "9:16"] } });
+    const out = $("#reelOut"); out.replaceChildren();
+    for (const reel of r.reels) {
+      out.append(h("div", { class: "reel" }, h("video", { src: reel.url, controls: true, loop: true, muted: true, playsinline: true, style: reel.aspect === "9:16" ? "max-height:340px;aspect-ratio:9/16" : "" }),
+        h("div", { class: "row" }, h("span", { class: "hint" }, `${reel.aspect}`), h("a", { class: "btn btn-sm", href: reel.url, download: `reel-${reel.aspect.replace(":", "x")}.mp4` }, "Download mp4"), h("a", { class: "btn btn-sm", href: reel.recipe_url, download: "" }, "recipe.json"))));
+    }
+    out.classList.remove("hidden");
+    toast(r.skipped_simulated ? `Reels ready (${r.skipped_simulated} simulated clip(s) skipped)` : "Reels ready");
+  } catch (e) { showError(e); }
+  btn.textContent = old; btn.disabled = !S.timeline.some(c => c.real);
+}
+
 /* ---------- gallery ---------- */
+function realMix(items) {
+  const by = {};
+  for (const i of items.filter(x => x.real)) { const k = `${i.model_label || "LTX-2.3"} via ${i.platform || "Comfy Cloud"}`; by[k] = (by[k] || 0) + 1; }
+  return Object.entries(by).map(([k, n]) => `${n}× ${k}`).join(", ");
+}
 function renderGallery() {
   const box = $("#gallery"); box.replaceChildren();
   const items = S.gallery.filter(i => i.kind === "clip" || i.kind === "sequence");
   const nReal = items.filter(i => i.real).length, nSim = items.length - nReal;
   $("#galNote").className = "hint warn" + (nSim ? "" : " hidden");
-  $("#galReal").textContent = nReal ? `${nReal} real clip${nReal > 1 ? "s" : ""} (green badge): generated by a model on Comfy Cloud or via the Comfy Router, replayed from examples/real/.` : "No real model clips have been added yet (see docs/REAL_RUN.md).";
+  $("#galReal").textContent = nReal ? `${nReal} real clip${nReal > 1 ? "s" : ""} (green badge): ${realMix(items)}, replayed from examples/real/ (click one for its exact model, prompt and credits).` : "No real model clips have been added yet (see docs/REAL_RUN.md).";
   if (!items.length) { box.append(h("p", { class: "hint" }, "Run scripts/make_fixtures.py to generate example clips.")); return; }
   for (const it of items) {
     const pn = (S.presets.find(p => p.id === it.preset) || {}).name || it.preset, sn = (S.samples.find(x => x.sample_id === it.input) || {}).title || it.input;
-    const label = it.title || `${pn} · ${sn}` + (it.variant && /^router-/.test(it.variant) ? " · Router" : "");
+    const label = it.title || `${pn} · ${sn}` + (it.real && it.variant ? ` · ${it.model_label || "Router"}` : "");
     const v = h("video", { src: it.url, muted: true, loop: true, playsinline: true, preload: "metadata", onmouseenter: e => e.target.play().catch(() => {}), onmouseleave: e => e.target.pause() }); v.muted = true;
     const tag = h("em", { class: "g-tag " + (it.real ? "real" : "sim") }, it.real ? "REAL" : "SIM");
     box.append(h("button", { class: "g-item" + (it.real ? " is-real" : ""), title: label + (it.real ? ` (${it.badge})` : " (simulated placeholder)"), onclick: () => {
       const rurl = it.recipe_url || (it.recipe ? `/examples/outputs/${it.recipe}` : null);
-      setVideo(it.url); S.result = { artifacts: [{ kind: "video", url: it.url }], recipe_url: rurl, simulated: !!it.simulated, real: !!it.real, badge: it.badge };
+      setVideo(it.url); S.result = { artifacts: [{ kind: "video", url: it.url }], recipe_url: rurl, simulated: !!it.simulated, real: !!it.real, badge: it.badge, model_label: it.model_label, platform: it.platform };
       S.view = "video"; applyView(); showSim(!!it.simulated, S.result); $("#stageTitle").textContent = label; updateActions();
     } }, v, tag, h("span", {}, label)));
   }
@@ -362,13 +405,11 @@ function caption() {
   const p = S.presets.find(x => x.id === S.presetId); const r = S.result;
   const src = S.source ? S.source.name : "a single frame";
   const tags = "Open source, built around @ComfyUI. #OpenSourceHiggsfield";
-  if (r && r.real && r.badge && !/LTX/.test(r.badge)) {
-    // A real clip from another model (e.g. Grok Imagine 1.5 lite via the Comfy Router): name it exactly as its badge does.
-    return `${r.badge.split(" · ")[0]}, on "${src}". The camera move comes from the Shot Director preset library; the app is a shot-planning workflow around it. ${tags}`;
-  }
   if (r && r.real) {
-    // The real clips were prompt-only runs of the official template in the Comfy Cloud web UI; the app did not generate them.
-    return `Real LTX-2.3 clip on "${src}": made in Comfy Cloud with a prompt only (no camera LoRA, unedited). The camera move comes from the Shot Director preset library; the app is a shot-planning workflow around it. ${tags}`;
+    // Name the real model and platform exactly as the clip's own recipe does (LTX-2.3 on Comfy Cloud vs a partner model via the Comfy Router).
+    const model = r.model_label || (r.badge || "").replace(/^Real /, "").split(" output")[0] || "a model", where = r.platform || "Comfy";
+    const how = where === "Comfy Router" ? `${model} via the Comfy Router (a partner model, not open weights; prompt only, no camera LoRA, unedited)` : `${model} on ${where} (prompt only, no camera LoRA, unedited)`;
+    return `Real clip: ${how}, on "${src}". The camera move comes from the Shot Director preset library; the app is a shot-planning workflow around it. ${tags}`;
   }
   const eng = S.engines.find(e => e.id === S.engineId);
   if (!r || r.simulated) return `${p.name} on "${src}" in Shot Director: (Demo mode: a simulated camera move over a still, not model output.) One frame in, full coverage out. ${tags}`;
@@ -400,6 +441,7 @@ function bind() {
   $("#getCov").addEventListener("click", getCoverage);
   $("#addTl").addEventListener("click", () => { const v = S.result && S.result.artifacts.find(a => a.kind === "video"); if (v) addToTimeline(v.url, $("#stageTitle").textContent.split(" · ")[0] || "Shot", S.result.simulated, S.result.real); });
   $("#exportSeq").addEventListener("click", exportSeq);
+  $("#makeReel").addEventListener("click", makeReel); $("#addReal").addEventListener("click", addAllReal);
   $("#copyCaption").addEventListener("click", async () => { try { await navigator.clipboard.writeText(caption()); toast("Caption copied"); } catch { toast("Copy blocked: select the text manually"); prompt("Caption", caption()); } });
 }
 

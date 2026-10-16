@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shot Director: one frame in, full coverage out</title>
+<title>Shot Director: free previs, then one real render</title>
 <meta name="description" content="Open-source camera-move studio for Comfy workflows. Pick a camera move, re-shoot from another angle, get a coverage board and cut a sequence.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23101218'/%3E%3Cpath d='M6 12h20v13H6z' fill='none' stroke='%23ffb340' stroke-width='2.2'/%3E%3Cpath d='M6 12l3-6 4 1.2-3 6M14 13.2l3-6 4 1.2-3 6' fill='%23ffb340'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/static/style.css">
@@ -12,7 +12,7 @@
 <header class="topbar">
   <div class="brand">
     <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#171a22"/><path d="M6 12h20v13H6z" fill="none" stroke="#ffb340" stroke-width="2.2"/><path d="M6 12l3-6 4 1.2-3 6M14 13.2l3-6 4 1.2-3 6" fill="#ffb340"/></svg>
-    <div><h1>Shot Director</h1><p>One frame in, full coverage out.</p></div>
+    <div><h1>Shot Director</h1><p>Free previs, then one real render.</p></div>
   </div>
   <div class="top-right">
     <span id="modePill" class="pill hidden"></span>
@@ -80,7 +80,7 @@
     </div>
 
     <div class="card">
-      <div class="card-h"><span class="step">3</span><h2>Engine</h2></div>
+      <div class="card-h"><span class="step">3</span><h2>Previs free, render once</h2></div>
       <div id="engines" class="engines" role="radiogroup" aria-label="Engine"></div>
       <label id="modelRow" class="field hidden"><span>Router model</span><select id="modelSel"></select></label>
       <div id="estimate" class="estimate" aria-live="polite"></div>
@@ -113,6 +113,7 @@
       </div>
       <div id="errorBox" class="errorbox hidden" role="alert"></div>
     </div>
+    <div id="renderNext" class="callout hidden" aria-live="polite"></div>
     <div class="actions" id="actions">
       <button class="btn" id="addTl" disabled>+ Add to timeline</button>
       <a class="btn" id="dlVideo" download hidden>Download video</a>
@@ -138,6 +139,11 @@
         <label class="check"><input type="checkbox" id="xfade" checked> 0.4 s crossfades</label>
         <button id="exportSeq" class="btn btn-primary" disabled>Export sequence</button>
       </div>
+      <div class="row">
+        <button id="addReal" class="btn btn-sm" title="Put every real model clip from the gallery on the timeline">+ All real clips</button>
+        <button id="makeReel" class="btn btn-sm" disabled title="Cut the REAL clips on the timeline into a 16:9 and a 9:16 reel with the model name burned in; simulated clips are skipped">Make my reel (16:9 + 9:16)</button>
+      </div>
+      <div id="reelOut" class="seq-out hidden"></div>
       <div id="seqOut" class="seq-out hidden">
         <video id="seqVid" controls loop muted playsinline></video>
         <div class="row"><a id="seqDl" class="btn btn-sm" download>Download mp4</a><a id="seqRecipe" class="btn btn-sm" download>recipe.json</a></div>

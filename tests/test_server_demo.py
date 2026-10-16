@@ -112,3 +112,43 @@ def test_gallery_manifest_points_at_real_files(client):
     for it in items:
         if it["kind"] == "clip":
             assert client.get(it["url"]).status_code == 200
+
+
+def test_reel_uses_only_real_clips_and_labels_them(client):
+    gal = client.get("/api/gallery").json()["items"]
+    real = [i for i in gal if i.get("real")]
+    sim = next(i for i in gal if i.get("simulated") and i["kind"] == "clip")
+    assert real and all(i.get("model_label") and i.get("platform") for i in real)  # captions can name the real model
+    # a mix: the simulated clip must be skipped, the real one kept, both aspect ratios produced
+    r = client.post("/api/reel", json={"clips": [real[0]["url"], sim["url"]], "crossfade": 0.0})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["skipped_simulated"] == 1 and [x["aspect"] for x in body["reels"]] == ["16:9", "9:16"]
+    for reel in body["reels"]:
+        assert reel["recipe"]["simulated"] is False and reel["recipe"]["params"]["real_clips"] == 1 and reel["recipe"]["params"]["labels"] is True
+        assert client.get(reel["url"]).status_code == 200
+    # nothing real -> a clear refusal, not a silent simulated "reel"
+    assert client.post("/api/reel", json={"clips": [sim["url"]]}).status_code == 422
+
+
+def test_demo_replays_a_real_coverage_board_when_one_exists(tmp_path):
+    """examples/real/coverage/<sample>/ (six stills + a non-simulated recipe) replaces the simulated coverage, with real=True."""
+    import json as _json
+
+    from app import angles
+    from app.engines.fixtures import FixturesEngine
+    from app.samples import sample_source
+    from app.types import CoverageRequest
+
+    d = tmp_path / "real" / "coverage" / "alley"
+    d.mkdir(parents=True)
+    for s in angles.COVERAGE:
+        Image.new("RGB", (64, 36), (10, 20, 30)).save(d / f"coverage-{s['id']}.jpg")
+    (d / "recipe.json").write_text(_json.dumps({"simulated": False, "badge": "Real FLUX 3 Image stills via Comfy Router", "engine": "router"}))
+    eng = FixturesEngine(real_dir=tmp_path / "real")
+    res = eng.coverage(CoverageRequest(sample_source("alley")), lambda e: None, tmp_path / "out")
+    assert len(res.artifacts) == 6 and all(a.meta["real"] and a.meta["simulated"] is False for a in res.artifacts)
+    assert res.recipe["simulated"] is False and res.credits_used == 0.0
+    # an incomplete or simulated-flagged folder is ignored (never presented as real)
+    (d / "coverage-wide.jpg").unlink()
+    assert eng._real_coverage("alley") is None
