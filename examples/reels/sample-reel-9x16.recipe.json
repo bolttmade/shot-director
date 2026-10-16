@@ -1,0 +1,33 @@
+{
+  "schema": "shot-director/recipe@1",
+  "app_version": "0.1.0",
+  "created": "2026-10-16T20:14:55+00:00",
+  "kind": "sequence",
+  "engine": "ffmpeg",
+  "model": "ffmpeg-xfade",
+  "simulated": false,
+  "provenance": "ffmpeg edit of 4 clip(s): 4 real model output, 0 SIMULATED placeholder",
+  "source": {
+    "name": "4 clips",
+    "sha256": null
+  },
+  "preset": null,
+  "prompt": "",
+  "negative": "",
+  "seed": 0,
+  "params": {
+    "clips": [
+      "/examples/real/forest-cabin__fpv-drone__router-minimax-h3.mp4",
+      "/examples/real/forest-cabin__dolly-in__router-minimax-h3.mp4",
+      "/examples/real/coast-lighthouse__orbit-right__router-minimax-h3.mp4",
+      "/examples/real/alley__crane-up__router-minimax-h3.mp4"
+    ],
+    "crossfade_s": 0.4,
+    "aspect": "9:16",
+    "labels": true,
+    "real_clips": 4,
+    "simulated_clips": 0
+  },
+  "workflow_sha256": null,
+  "credits_used": null
+}
