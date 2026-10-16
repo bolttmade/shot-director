@@ -79,6 +79,19 @@ class FixturesEngine(Engine):
                 return it
         return None
 
+    def _real_coverage(self, sample_id: str | None) -> tuple[Path, dict] | None:
+        """examples/real/coverage/<sample>/ with coverage-<shot>.jpg for all six shots + recipe.json written by the live run."""
+        if not sample_id or "/" in sample_id or ".." in sample_id:
+            return None
+        d = self.real_dir / "coverage" / sample_id
+        try:
+            rec = json.loads((d / "recipe.json").read_text())
+        except (OSError, ValueError):
+            return None
+        if not isinstance(rec, dict) or rec.get("simulated", True) is not False or not all((d / f"coverage-{s['id']}.jpg").is_file() for s in angles.COVERAGE):
+            return None
+        return d, rec
+
     # ------------------------------------------------------------------ shot
     def run_shot(self, req: ShotRequest, emit: Emit, out_dir: Path) -> Result:
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -149,6 +162,18 @@ class FixturesEngine(Engine):
     # ------------------------------------------------------------------ coverage
     def coverage(self, req: CoverageRequest, emit: Emit, out_dir: Path) -> Result:
         out_dir.mkdir(parents=True, exist_ok=True)
+        real_cov = self._real_coverage(req.source.sample_id)
+        if real_cov:  # a REAL FLUX 3 coverage board (made earlier through the Comfy Router) beats the simulated one
+            rdir, rrec = real_cov
+            emit({"type": "status", "status": "queued", "message": "Found a real coverage board for this frame (FLUX 3 Image via the Comfy Router). Replaying it: it was generated earlier, not now."})
+            arts = []
+            for i, shot in enumerate(angles.COVERAGE):
+                dst = out_dir / f"coverage-{shot['id']}.jpg"
+                shutil.copyfile(rdir / f"coverage-{shot['id']}.jpg", dst)
+                arts.append(Artifact("image", dst, shot["label"], {"simulated": False, "real": True, "shot": shot["id"], "label": rrec.get("badge", "")}))
+                emit({"type": "progress", "value": (i + 1) / 6, "message": f"Replaying real coverage: {shot['label']}"})
+                time.sleep(0.1)
+            return Result(arts, {**rrec, "simulated": False, "replayed_from": f"real/coverage/{rdir.name}"}, 0.0)
         emit({"type": "status", "status": "running", "message": "Demo engine: simulated coverage"})
         hit = self._lookup("coverage", req.source.sample_id)
         arts: list[Artifact] = []

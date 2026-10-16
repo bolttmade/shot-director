@@ -1,0 +1,53 @@
+{
+  "schema": "shot-director/recipe@1",
+  "kind": "coverage",
+  "engine": "router",
+  "model": "bfl/flux-3-image (Comfy Router, partner model)",
+  "model_label": "FLUX 3 Image",
+  "platform": "Comfy Router",
+  "simulated": false,
+  "date": "2026-10-16",
+  "badge": "Real FLUX 3 Image stills via Comfy Router (6 image edits of the alley still, not open weights), unedited",
+  "provenance": "real bfl/flux-3-image output via Comfy Router (partner API): six image edits of examples/inputs/alley.jpg, one request per angle, unedited apart from JPEG re-save",
+  "source": {
+    "name": "Rainy Alley",
+    "sha256": "340734918f5c4ff59d7fe3d925fdbefa90df81e3e139c59f1145f9b041e8f979"
+  },
+  "params": {
+    "shots": [
+      "wide",
+      "medium",
+      "close",
+      "low",
+      "high",
+      "profile"
+    ],
+    "resolution": "1k (about 1360x768 as delivered)",
+    "aspect_ratio": "16:9"
+  },
+  "prompts": {
+    "wide": "Re-shoot this exact scene from a different camera position (Wide): straight-on, camera at eye level, wide framing pulled back to show more of the surroundings. Keep the same subject, location, style, lighting and colours; only the camera moves.",
+    "medium": "Re-shoot this exact scene from a different camera position (Medium): straight-on, camera at eye level, medium framing. Keep the same subject, location, style, lighting and colours; only the camera moves.",
+    "close": "Re-shoot this exact scene from a different camera position (Close-up): straight-on, camera at eye level, close-up framing. Keep the same subject, location, style, lighting and colours; only the camera moves.",
+    "low": "Re-shoot this exact scene from a different camera position (Low angle): straight-on, low camera angle looking up, medium framing. Keep the same subject, location, style, lighting and colours; only the camera moves.",
+    "high": "Re-shoot this exact scene from a different camera position (High angle): straight-on, high camera angle looking down, medium framing. Keep the same subject, location, style, lighting and colours; only the camera moves.",
+    "profile": "Re-shoot this exact scene from a different camera position (Over-shoulder / profile): from a three-quarter angle on the right, camera at eye level, medium framing. Keep the same subject, location, style, lighting and colours; only the camera moves."
+  },
+  "router_request_ids": {
+    "wide": "b45cf408-b7ee-4de1-b601-5658603c1b28",
+    "medium": "898192f6-ce15-45f6-84a0-d3315f019359",
+    "close": "417c4883-a63a-4e31-a14c-02f323dade03",
+    "low": "2f79329d-b4b9-40e5-ba85-2b45791acc0f",
+    "high": "5092db8d-5ed2-4212-926c-d4c460e11cb3",
+    "profile": "07804877-ce57-4fcd-bb97-048ce89960e3"
+  },
+  "credits_used": 86.9,
+  "credits_estimate": 86.85,
+  "credits_note": "Static-table ESTIMATE 86.85 credits for 6 stills; balance read before/after the run: 591.878 -> 550.694 USD cents = 86.9 credits at 211/USD (14.48 per still, same as the 3 text-to-image stills). Router /estimate is not enabled for this workspace.",
+  "rating": 7,
+  "quality": "six coherent angles of the same alley; the front close-up and the high angle are the best, wide and medium are close to each other, and the low/profile angles re-imagine parts of the alley",
+  "open_weights": false,
+  "camera_lora": false,
+  "edited": false,
+  "notes": "Made by scripts/router_coverage.py, i.e. the app's Router engine coverage() path, run live for the first time. The Demo engine replays these six stills (green badge) for the alley frame."
+}
