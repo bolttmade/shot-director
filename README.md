@@ -7,9 +7,9 @@
 ![A short flow: real dolly, A/B player, real crane, timeline export](docs/screenshots/demo-flow.gif)
 
 > **Honesty box (read this first).**
-> * **Real model output in this repo:** two LTX-2.3 clips made on Comfy Cloud with a prompt only (no camera LoRA), plus one Grok Imagine 1.5 lite clip made through the Comfy Router API (prompt-only, not open weights), all unedited and shown with a green badge. Nothing else here is real model output. Details: [Real vs simulated outputs](#real-vs-simulated-outputs).
+> * **Real model output in this repo:** two LTX-2.3 clips made on Comfy Cloud with a prompt only (no camera LoRA), plus two Grok Imagine 1.5 lite clips (a dolly-in at 480p and a crane-up at 720p) made through the Comfy Router API (prompt-only, not open weights, not LTX), all unedited and shown with a green badge. Nothing else here is real model output. Details: [Real vs simulated outputs](#real-vs-simulated-outputs).
 > * `DEMO=1` runs with **no keys, no GPU, no network**. In that mode every other video and still is a **simulated depth-parallax camera move**, badged amber ("Demo fixture: simulated camera move, not model output") and recorded as `"simulated": true`.
-> * The **open-weights** (camera-LoRA graphs written for LTX-2 19B, not LTX-2.3; Qwen angle LoRA) path is implemented to the documented SDK contract and covered by contract tests with a fake client, but was **not run against a live server**. The **Router** image-to-video path was run live once (one clip, about 30-33 credits; `/estimate` was not enabled for the workspace, so the static price table was used); the FLUX stills on Router were not. The ComfyUI graphs in `workflows/` are **UNTESTED**. See [Status](#status-what-is-verified-and-what-is-not).
+> * The **open-weights** (camera-LoRA graphs written for LTX-2 19B, not LTX-2.3; Qwen angle LoRA) path is implemented to the documented SDK contract and covered by contract tests with a fake client, but was **not run against a live server**. The **Router** image-to-video path was run live twice (two clips, about 30-33 and about 48 credits; `/estimate` was not enabled for the workspace, so the static price table was used and the real charge was read from the balance); the FLUX stills on Router were not. The ComfyUI graphs in `workflows/` are **UNTESTED**. See [Status](#status-what-is-verified-and-what-is-not).
 
 ## Run it in under five minutes (no keys)
 
@@ -99,7 +99,7 @@ Design details: [docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md). Costs: [docs/COSTS
 
 | | Real | Simulated |
 |---|---|---|
-| What | 3 clips: `alley__dolly-in` and `alley__crane-up` from LTX-2.3 on Comfy Cloud (web UI, official *LTX-2.3: Image to Video* template), and `alley__dolly-in__router-grok-imagine-1-5-lite` from Grok Imagine 1.5 lite via the Comfy Router API (`scripts/smoke_real.py`; a partner model, **not open weights**). All **prompt-only, no camera LoRA, unedited** | Everything else: the app's depth-parallax virtual camera over a still |
+| What | 4 clips: `alley__dolly-in` and `alley__crane-up` from LTX-2.3 on Comfy Cloud (web UI, official *LTX-2.3: Image to Video* template), and `alley__dolly-in__router-grok-imagine-1-5-lite` (480p) and `alley__crane-up__router-grok-imagine-1-5-lite-720p` (720p, the cleanest, hero clip, own rating 7/10) from Grok Imagine 1.5 lite via the Comfy Router API (`scripts/smoke_real.py`; a partner model, **not open weights**, not LTX). All **prompt-only, no camera LoRA, unedited** | Everything else: the app's depth-parallax virtual camera over a still |
 | Where | `examples/real/`, workflows in `workflows/real/` | `examples/outputs/`, `examples/presets/`, anything you generate in demo mode |
 | Badge | green | amber "Demo fixture: simulated" |
 
@@ -111,13 +111,13 @@ No camera-LoRA result exists in this repo, and none is claimed. Limitation: came
 |---|---|
 | Demo engine, server, UI, timeline, stitching | Working; `pytest -q` covers it; screenshots in `docs/screenshots/` |
 | Presets (17), schema, prompt building | Validated by tests |
-| Router adapter | Contract-tested (mocked `/estimate`, fake SDK client): cap, unknown-cost refusal, single submit, 402 handling, URL extraction. **Run live once** for image-to-video (Grok Imagine 1.5 lite, 5 s @ 480p, estimate by static table because `/estimate` was not enabled, about 30-33 credits, no errors). FLUX stills and other models not run live |
+| Router adapter | Contract-tested (mocked `/estimate`, fake SDK client): cap, unknown-cost refusal, single submit, 402 handling, URL extraction. **Run live twice** for image-to-video (Grok Imagine 1.5 lite, 5 s: 480p dolly-in about 30-33 credits, 720p crane-up about 48 credits; estimate by static table because `/estimate` was not enabled; no errors). FLUX stills and other models not run live |
 | Workflow adapter | Contract-tested with a fake client against the real graphs and `.meta.json` node ids. Not run live |
 | `workflows/*.json` | **UNTESTED** in ComfyUI. Assembled from the official LTX-2 and Qwen angle examples; node ids checked statically |
 | Open-weights compliance | Static check only (no partner/API nodes); weights installed on a server are not verified |
 | SDK 0.5.0 surface | Checked against the installed package by `tests/test_sdk_surface.py` |
 | Example outputs in `examples/outputs/` | **Simulated** placeholders (see [examples/CREDITS.md](examples/CREDITS.md)) |
-| `examples/real/` | 2 real LTX-2.3 clips from Comfy Cloud and 1 real Grok Imagine 1.5 lite clip from the Router (all prompt-only, unedited, mixed quality). Importer, badge and engine preference are tested with synthetic clips; the real files are probed on import |
+| `examples/real/` | 2 real LTX-2.3 clips from Comfy Cloud and 2 real Grok Imagine 1.5 lite clips from the Router (all prompt-only, unedited, mixed quality). Importer, badge and engine preference are tested with synthetic clips; the real files are probed on import |
 | `workflows/ltx23_i2v_official_template.json` | Unmodified official Comfy Org template (MIT), valid JSON, scanned: no partner/API nodes. Not run by us |
 
 Known gaps: Router `/estimate` may answer `403 not_enabled` for some workspaces (the app falls back to a static price table and says so); uploaded images get a heuristic pseudo-depth in Demo mode (the alley has a hand-tuned geometric depth map from `scripts/make_alley_depth.py`), so parallax on photos is only a rough approximation; Demo "re-shoot" cannot show the far side of an object, so angles are clamped.
