@@ -52,7 +52,7 @@ Requests that ran, in time order (UTC dates all 2026-10-16; credits are balance 
 
 | # | Request | Model | Credits |
 |---|---|---|---|
-| 1 | `alley` + dolly-in, 5 s 480p | `xai/grok-imagine-video-1.5-lite` | about 33 (balance before not read) |
+| 1 | `alley` + dolly-in, 5 s 480p | `xai/grok-imagine-video-1.5-lite` | about 33 (est. 30.17; balance before not read) |
 | 2 | `alley` + crane-up, 5 s 720p | Grok lite | 48.27 |
 | 3-5 | three text-to-image stills: forest cabin, retro diner, coast lighthouse | `bfl/flux-3-image` | 3 x 14.48 |
 | 6-8 | `forest-cabin` dolly-in, `coast-lighthouse` orbit-right, `retro-diner` dolly-right | `minimax/minimax-h3` 768P | 3 x 135.78 |

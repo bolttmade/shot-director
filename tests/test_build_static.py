@@ -51,6 +51,12 @@ def test_clips_are_labelled_real_with_credits_and_never_simulated(built):
     for c in json.loads((out / "data.json").read_text())["clips"]:
         assert c["simulated"] is False and c["badge"].startswith("Real") and c["model_label"] and c["platform"]
         assert c["credits_used"] is not None and c["prompt"]
+    # the 480p dolly-in is an estimate only: shown as "about 33 (est. 30.17)" (the built data.json carries the label)
+    full = json.loads((ROOT / "space" / "data.json").read_text()) if (ROOT / "space" / "data.json").exists() else None
+    notes = json.loads((ROOT / "examples" / "real" / "alley__dolly-in__router-grok-imagine-1-5-lite.json").read_text())
+    assert notes["credits_label"] == "about 33 (est. 30.17)"
+    if full:
+        assert {c["id"]: c.get("credits_label") for c in full["clips"]}["alley__dolly-in__router-grok-imagine-1-5-lite"] == notes["credits_label"]
     html = (out / "index.html").read_text()
     assert "simulated previs" in html.lower() and "real model output" in html.lower() and "no backend" in html.lower()
 

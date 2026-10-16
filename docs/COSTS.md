@@ -13,9 +13,9 @@ Credits are **211 per US dollar** (Comfy's published rate). Prices below were re
 
 | Model | Role | Published | Measured by balance delta (2026-10-16) |
 |---|---|---|---|
-| `xai/grok-imagine-video-1.5-lite` | cheapest image-to-video for testing | $0.0286/s at 480p, $0.0429/s at 720p | **$0.0458/s at 720p** (48.28 credits per 5 s, 5 runs). The table **under-reported by about 7%** until it was updated to this. 480p: one run, about 33 credits per 5 s |
+| `xai/grok-imagine-video-1.5-lite` | cheapest image-to-video for testing | $0.0286/s at 480p, $0.0429/s at 720p | **$0.0458/s at 720p** (48.28 credits per 5 s, 5 runs). The table **under-reported by about 7%** until it was updated to this. 480p: one run, about 33 credits per 5 s (est. 30.17) |
 | `minimax/minimax-h3` | default video model | $0.1287/s at 768P | **$0.1287/s: exact** (135.78 credits per 5 s, 5 runs) |
-| `bfl/flux-3-video` | image-to-video (FLUX bonus) | about $0.243/s at hd in Comfy's pricing UI (billed per GPU-second) | **$0.2145/s** (226.3 credits for one 5 s hd clip, 12% below the UI figure; one run) |
+| `bfl/flux-3-video` | image-to-video | about $0.243/s at hd in Comfy's pricing UI (billed per GPU-second) | **$0.2145/s** (226.3 credits for one 5 s hd clip, 12% below the UI figure; one run) |
 | `bfl/flux-3-image` | stills, angle re-shoots, coverage | usage-based (GPU-seconds) | **14.48 credits per 1K still** (9 requests: 3 text-to-image and 6 coverage edits, 86.9 / 6 = 14.48) |
 | `byteplus/dreamina-seedance-2-5-260628` | alternate | see `/estimate` (no static price) | not run |
 | `ltx/ltx-2-5-fast` / `-pro` | text-to-video only (no image input) | $0.1287/s / $0.1716/s at 720p | not run |
@@ -35,7 +35,7 @@ Everything below happened on **2026-10-16** through the Comfy Router API with th
 | Where | What | Estimate | Measured | Request id |
 |---|---|---|---|---|
 | Comfy Cloud web UI (free tier) | 3 LTX-2.3 prompt-only runs + 1 discarded pilot | 0 | 0 | n/a |
-| Router | Grok lite `alley` + `dolly-in`, 5 s at 480p | 30.17 | about 33.2 (balance before the run was **not** read; the start was presumed to be 1,000 cents, so 30-33) | `f98c1931-c864-4678-9671-60d4f9d9df48` |
+| Router | Grok lite `alley` + `dolly-in`, 5 s at 480p | 30.17 | about 33 (est. 30.17; about 33.2 by balance, but the balance before the run was **not** read; the start was presumed to be 1,000 cents, so 30-33) | `f98c1931-c864-4678-9671-60d4f9d9df48` |
 | Router | Grok lite `alley` + `crane-up`, 5 s at 720p | 45.26 | **48.27** (984.27 → 961.39 cents) | `01e36596-d4d5-47dd-91bc-7bac11f57373` |
 
 ### Input stills (FLUX 3 Image, text-to-image)

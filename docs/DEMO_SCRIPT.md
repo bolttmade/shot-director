@@ -9,7 +9,7 @@
 1. Two kinds of clips appear, and each is named out loud and on screen: **real** (green badge naming the model: LTX-2.3 on Comfy Cloud, or MiniMax H3 / Grok Imagine 1.5 lite / FLUX 3 Video / FLUX 3 Image via the Comfy Router, *prompt-only, no camera LoRA, unedited*) and **simulated** (amber badge: the app's free virtual-camera previs over a still).
 2. Never call an amber clip "AI-generated" or "model output". It is a preview of the move.
 3. Never show or imply camera-LoRA results: none exist.
-4. Say the quality plainly with the own ratings: the hero H3 FPV swoop is 8/10 but invents its ending, FLUX 3 Video barely moves (4/10), the LTX clips are 5/10. The failed LTX orbit is not shown.
+4. Say the quality plainly with the own ratings: the hero H3 FPV swoop is 7/10 (blurry mid-swoop, invents its ending), FLUX 3 Video barely moves (4/10), the LTX clips are 5/10. The failed LTX orbit is not shown.
 5. **Router beat + credit log.** Say that the Router ran live (12 video clips and 9 FLUX image requests, about 1,310 credits in total, every request logged in `docs/COSTS.md`), that these are partner models, not open weights and not LTX, and show the credit log briefly. Say that the open-weights and Cloud engines are contract-tested but not run live, and that `/estimate` was not enabled (the static price table was used).
 
 **Setup:** `DEMO=1 ./run.sh` (or the Docker image), browser at 1280x720. Start on the `alley` frame. No keys needed. Keep the end card under 5 s so editing slop cannot push the cut past 2:00.

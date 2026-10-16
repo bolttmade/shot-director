@@ -132,7 +132,7 @@ def build(out: Path, limit: int | None = None) -> dict:
         clips.append({
             "id": c.path.stem, "input": c.input, "input_title": titles.get(c.input, c.input), "preset": c.preset, "preset_name": pnames.get(c.preset, c.preset), "variant": c.variant,
             "file": f"media/clips/{c.path.name}", "model_label": n.get("model_label") or realmod.DEFAULT_MODEL_LABEL, "platform": n.get("platform") or realmod.DEFAULT_PLATFORM,
-            "badge": c.badge, "credits_used": rec.get("credits_used"), "rating": n.get("rating"), "request_id": n.get("router_request_id"),
+            "badge": c.badge, "credits_used": rec.get("credits_used"), "credits_label": n.get("credits_label"), "rating": n.get("rating"), "request_id": n.get("router_request_id"),
             "quality": n.get("quality") or rec.get("quality"), "verdict": n.get("quality_verdict"), "prompt": rec.get("prompt") or n.get("prompt"), "date": n.get("date") or rec.get("run_date"),
             "simulated": False,
         })

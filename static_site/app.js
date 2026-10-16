@@ -133,7 +133,7 @@ function showVideo(src) { const v = $("#vid"); $("#gl").classList.add("hidden");
 function infoReal(c) {
   const box = $("#info"); box.replaceChildren(
     h("p", {}, h("b", {}, `${c.model_label} via ${c.platform}`), ` · ${c.preset_name} on ${c.input_title}`),
-    h("p", {}, h("span", { class: "k" }, "credits "), c.credits_used ? fmtCr(c.credits_used) : "0 (free tier)", h("span", { class: "k" }, "  ·  own rating "), c.rating != null ? c.rating + "/10" : "n/a", h("span", { class: "k" }, "  ·  request id "), c.request_id || "n/a (Comfy Cloud web UI)"),
+    h("p", {}, h("span", { class: "k" }, "credits "), c.credits_label || (c.credits_used ? fmtCr(c.credits_used) : "0 (free tier)"), h("span", { class: "k" }, "  ·  own rating "), c.rating != null ? c.rating + "/10" : "n/a", h("span", { class: "k" }, "  ·  request id "), c.request_id || "n/a (Comfy Cloud web UI)"),
     h("p", {}, c.quality || ""), c.verdict ? h("p", { class: "k" }, c.verdict) : null,
     h("p", { class: "k" }, "Prompt: " + (c.prompt || "")));
 }
@@ -175,7 +175,7 @@ function previs() {
   const real = realFor(S.input.id, S.preset.id), box = $("#info");
   box.replaceChildren(h("p", {}, h("b", {}, "Previsualised. "), "This is a free preview of the move computed in your browser from the still and a ",
     S.input.depth_kind === "hand-made" ? "hand-made depth map" : "heuristic depth guess", " (simplified: stretched at edges, no inpainting). It is not a generated video."),
-    real ? h("div", { class: "callout" }, `A real render of this exact still and move exists: ${real.model_label} via ${real.platform}, ${real.credits_used ? fmtCr(real.credits_used) + " credits" : "free tier"}, own rating ${real.rating ?? "n/a"}/10. Press "Play the real render".`) : h("div", { class: "callout" }, "No real render of this still + move is committed. See the gallery below for the real clips, or run it yourself (section 5)."));
+    real ? h("div", { class: "callout" }, `A real render of this exact still and move exists: ${real.model_label} via ${real.platform}, ${real.credits_used ? (real.credits_label || fmtCr(real.credits_used)) + " credits" : "free tier"}, own rating ${real.rating ?? "n/a"}/10. Press "Play the real render".`) : h("div", { class: "callout" }, "No real render of this still + move is committed. See the gallery below for the real clips, or run it yourself (section 5)."));
 }
 function playReal(c) {
   cancelAnimationFrame(S.raf); showVideo(c.file); setBadge("real", c.badge || `Real ${c.model_label} output via ${c.platform}`);
@@ -190,7 +190,7 @@ function renderGallery() {
     const v = h("video", { src: c.file + "#t=0.8", preload: "metadata", muted: "", playsinline: "" });
     box.append(h("button", { class: "g", onclick: () => { S.input = S.data.inputs.find(i => i.id === c.input) || S.input; S.preset = S.data.presets.find(p => p.id === c.preset) || S.preset; renderInputs(); renderMoves(); updateButtons(); playReal(c); window.scrollTo({ top: 0, behavior: "smooth" }); } },
       h("div", { class: "th" }, v, h("span", { class: "b real tg" }, "REAL")),
-      h("div", { class: "m" }, h("b", {}, `${c.preset_name} · ${c.input_title}`), h("span", {}, `${c.model_label} · ${c.credits_used ? fmtCr(c.credits_used) + " cr" : "free"} · ${c.rating != null ? c.rating + "/10" : "unrated"}`))));
+      h("div", { class: "m" }, h("b", {}, `${c.preset_name} · ${c.input_title}`), h("span", {}, `${c.model_label} · ${c.credits_used ? (c.credits_label || fmtCr(c.credits_used)) + " cr" : "free"} · ${c.rating != null ? c.rating + "/10" : "unrated"}`))));
   }
 }
 function renderCoverage() {

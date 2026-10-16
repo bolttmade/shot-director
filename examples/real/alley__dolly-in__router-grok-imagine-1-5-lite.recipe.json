@@ -53,10 +53,11 @@
     "quality": "smooth forward push-in; scooter slides out left; some invented detail at the end (own rating 6/10)",
     "quality_verdict": "A smooth, steady push down the alley with the scooter leaving frame on the left and steam drifting; the lighting stays consistent. Walls and windows near the end are invented by the model, not taken from the still. Low resolution (480p). Own rating 6/10.",
     "credits_used": 30.17,
-    "credits_note": "30.17 is the app's static-table ESTIMATE (Router /estimate returned not_enabled), which the app records as credits_used. The account balance read after the run (GET api.comfy.org/customers/balance) was 984.27 (USD cents), i.e. 15.73 cents (~33.2 credits at 211/USD) below a presumed 1000 cents before; that prior balance was NOT read, so the true charge is unverified (about 30-33 credits).",
+    "credits_note": "Reported as 'about 33 (est. 30.17)'. 30.17 is the app's static-table ESTIMATE (Router /estimate returned not_enabled), which the app records as credits_used. The account balance read after the run (GET api.comfy.org/customers/balance) was 984.27 (USD cents), i.e. 15.73 cents (~33.2 credits at 211/USD) below a presumed 1000 cents before; that prior balance was NOT read, so the true charge is unverified (about 30-33 credits).",
     "router_request_id": "f98c1931-c864-4678-9671-60d4f9d9df48",
     "notes": "Comfy Router, one request via scripts/smoke_real.py --duration 5. Unedited; the importer only strips container metadata.",
-    "rating": 6.0
+    "rating": 6.0,
+    "credits_label": "about 33 (est. 30.17)"
   },
   "run_date": "2026-10-16",
   "output_sha256": "cae8d186779b95310d802f8a0bce35146899aaa407866bcf9a8138520c6ad1fc",

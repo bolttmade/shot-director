@@ -21,7 +21,7 @@ Short record of how the real clips in `examples/real/` were made (two from Comfy
 | `alley__crane-up.mp4` | `crane-up` | slow crane move upward revealing the alley | **Partial:** it rises, but also pushes forward and the scooter flattens. Own rating 5/10. | Yes, green badge **plus** "partial: rises but also pushes forward" |
 | `alley__dolly-in__router-grok-imagine-1-5-lite.mp4` | `dolly-in` | short preset prompt: the camera dollies in smoothly (Router, Grok Imagine 1.5 lite, 5 s @ 480p; see Run 4 below) | Smooth push-in, some invented detail at the end. Own rating 6/10. | Gallery only, own green badge |
 | `alley__crane-up__router-grok-imagine-1-5-lite-720p.mp4` | `crane-up` | the preset's own prompt: a sweeping crane shot, the camera rises high and steadily while pushing forward, tilting down (Router, Grok Imagine 1.5 lite, 5 s @ 720p; see Run 5 below) | **Clean crane.** Rises, pushes forward and tilts down; scooter sinks out of the bottom; walls and windows invented. Own rating 7/10. (Was the hero until the MiniMax H3 batch below produced better clips.) | Gallery only, own green badge |
-| orbit-left (not in the repo as a clip) | `orbit-left` | slow orbit left around the scooter | **Did not orbit.** Own rating 4/10. | **No.** Not imported, not shown anywhere. Only its workflow is kept in `workflows/real/` for the record |
+| LTX orbit-left | `orbit-left` | slow orbit left around the scooter | **Did not orbit.** Own rating 4/10. | **No.** Not imported, not shown anywhere. Only its workflow is kept in `workflows/real/` for the record |
 
 One earlier pilot render was discarded and is not used anywhere.
 
@@ -33,7 +33,7 @@ Takeaway, stated plainly: with a prompt alone, LTX-2.3 follows a plain dolly rea
 - **Model:** `xai/grok-imagine-video-1.5-lite` (Grok Imagine 1.5 lite, a partner model: **not open weights**), the cheapest image-to-video model on Router. Not LTX, not a camera LoRA.
 - **Request:** `examples/inputs/alley.jpg` as the first frame + the `dolly-in` preset prompt (exact text in the recipe), 5 s, 480p, 16:9. The delivered file is 736x400, 5.04 s, 24 fps, H.264 + AAC.
 - **Estimate:** `/estimate` replied that it is not enabled for this workspace, so the app used the static price table: **30.17 credits (about $0.143)**, under the 150-credit cap. This is the number the app recorded as `credits_used`.
-- **Real cost:** a read-only balance check afterwards showed 984.27 cents. Against a presumed 1,000 cents before (not read before the run) that is about 33.2 credits. So the charge is **about 30-33 credits** and the exact figure is unverified.
+- **Real cost:** a read-only balance check afterwards showed 984.27 cents. Against a presumed 1,000 cents before (not read before the run) that is about 33.2 credits. So the charge is shown as **about 33 (est. 30.17)** and the exact figure is unverified.
 - **Failures:** none. One submit, no retries, no 402. The request id is in the recipe.
 - **Result:** `examples/real/alley__dolly-in__router-grok-imagine-1-5-lite.mp4` (+ `.json` notes, `.recipe.json`). A smooth, steady push down the alley; the scooter slides out on the left and the steam drifts; lighting stays consistent. The walls and windows near the end are invented by the model. 480p. Own rating **6/10**, prompt-only, unedited (the importer only strips container metadata).
 - **In the app:** the file name carries a third part (`<input>__<preset>__<variant>.mp4`), which makes it a gallery-only clip with its own green badge naming Grok Imagine 1.5 lite and Comfy Router. The Demo engine keeps replaying the LTX-2.3 clip for `alley` + `dolly-in`; it never substitutes the Router clip.
@@ -59,16 +59,16 @@ Goal: show the app's pitch, **free previs, then one real render**, with real cli
 
 | Clip (`examples/real/`) | Model | Credits | Own rating | Honest verdict |
 |---|---|---|---|---|
-| `forest-cabin__fpv-drone__router-minimax-h3` | MiniMax H3 768P | 135.78 | **8/10, the hero** | Fast FPV swoop past the cabin and into the pines, real motion blur; leaves the still's framing entirely and the end of the forest is invented |
+| `forest-cabin__fpv-drone__router-minimax-h3` | MiniMax H3 768P | 135.78 | **7/10, the hero** (most dramatic motion) | Fast FPV swoop past the cabin and into the pines, real motion blur but soft and blurry mid-swoop; leaves the still's framing entirely and the end of the forest is invented |
 | `forest-cabin__dolly-in__router-minimax-h3` | MiniMax H3 | 135.78 | **8/10** | Cleanest move of the set: steady push to the cabin, rays and smoke coherent, slight fern drift |
 | `alley__crane-up__router-minimax-h3` | MiniMax H3 | 135.78 | 7/10 | Clean crane, like the Grok one but with slightly more natural steam parallax; revealed walls invented |
 | `coast-lighthouse__orbit-right__router-minimax-h3` | MiniMax H3 | 135.78 | 7/10 | A lateral parallax arc, not a true orbit: the far side of the lighthouse never shows |
 | `retro-diner__dolly-right__router-minimax-h3` | MiniMax H3 | 135.78 | 7/10 | Real parallax track along the booths; invented kitchen; drifts forward as well |
-| `alley__orbit-left__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 7/10 | **The orbit that LTX-2.3 prompt-only could not do** (that run was 4/10); the scooter shifts shape a little |
+| `alley__orbit-left__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 6/10 | A gentle arc or lateral drift, closer to an orbit than the LTX attempt (4/10); not a true orbit, and the scooter shifts shape a little |
 | `coast-lighthouse__jib-up__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 7/10 | Rises and tilts down; re-imagines the foreground grass as rock |
 | `retro-diner__dolly-in__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 7/10 | Clean push down the diner; booth detail softens |
 | `forest-cabin__push-in-rack__router-grok-imagine-1-5-lite-720p` | Grok lite 720p | 48.28 | 6/10 | Push-in works; **the requested rack focus is not visible** |
-| `retro-diner__arc__router-flux-3-video` | FLUX 3 Video hd | 226.3 | **4/10** | Beautiful and stable, but the arc barely happens. The most expensive clip is the weakest mover; kept as an honest data point and for the FLUX 3 bonus |
+| `retro-diner__arc__router-flux-3-video` | FLUX 3 Video hd | 226.3 | **4/10** | Beautiful and stable, but the arc barely happens. The most expensive clip is the weakest mover; kept as an honest data point |
 
 **What this says.** MiniMax H3 at 136 credits follows camera instructions best; by my ratings Grok lite at 48 credits (6-7/10) is within a point or two of H3 (7-8/10) for about a third of the price (and is where to start; this is one sample per move, not a benchmark); FLUX 3 Video is the prettiest and least obedient. Two earlier Grok clips (`alley` dolly-in 480p, 6/10; `alley` crane-up 720p, 7/10) sit alongside them. The takeaway for the tool: previs the move for free, render only the move you picked, and choose the model by what it obeys, not by price.
 
@@ -93,13 +93,3 @@ cp alley__dolly-in.mp4 alley__dolly-in.json examples/real/     # .json = notes (
 | Where | `examples/real/` | `examples/outputs/`, `examples/presets/` |
 | Badge | green | amber |
 | May be called "model output" | yes | **never** |
-
-## A possible further Cloud web run (on hold)
-
-One free run is left and is being held. If it is used, it needs:
-
-1. Same template, same input `alley.jpg`, settings left at defaults (so it is comparable).
-2. Decide the goal first. A re-try of `orbit-left` with a different prompt is the only one that would change the story; do not expect a prompt alone to fix it.
-3. Before pressing Run: check there is no price, "Upgrade" or credits prompt. If there is, stop. The Cloud web runs cost no credits. Router credits spent are listed in COSTS.md; never add a card, subscribe or spend further credits without the owner's approval.
-4. Save the video as `alley__<preset-id>.mp4` and write a notes JSON from `examples/real/_notes.example.json` with the **exact** prompt and an honest verdict; export the workflow (Comfy icon → File → **Export**) into `workflows/real/`; then run `scripts/import_real.py`.
-5. If the result is bad, keep it out of the gallery (it can stay in `workflows/real/` as a documented failure).
