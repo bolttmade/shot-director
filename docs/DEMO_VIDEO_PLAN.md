@@ -1,6 +1,6 @@
-# Demo video: plan and as-built (v2, 96 s, limit 1:45; entry limit 2:00)
+# Demo video: plan and as-built (v3, 96 s, limit 1:45; entry limit 2:00)
 
-Status: **v2 built** (free, local, no credits spent) with `scripts/make_demo_video.sh`. Entry rules: 2 minutes maximum, judged on the work (usable UI, example outputs, how it is built), not polish. The **honesty rules**, the "what not to say" list and the social-post draft live in [DEMO_SCRIPT.md](DEMO_SCRIPT.md) and apply here. The video is not posted or submitted by the builder: the owner submits it under their own name.
+Status: **v3 built** (free, local, no credits spent) with `scripts/make_demo_video.sh`. Entry rules: 2 minutes maximum, judged on the work (usable UI, example outputs, how it is built), not polish. The **honesty rules**, the "what not to say" list and the social-post draft live in [DEMO_SCRIPT.md](DEMO_SCRIPT.md) and apply here. The video is not posted or submitted by the builder: the owner submits it under their own name.
 
 **The story:** *free previs, then one real render.* Open on real outputs, show the app flow, then the platform/build beat, end on the two links.
 
@@ -31,6 +31,15 @@ So the repo's MIT label does not clearly cover the voice: the training data is r
 4. **Slides.** The platform slide has four big facts; the credit log shows one row per model with the real per-clip figure ("Grok Imagine lite · 6 clips: ~33 to 48 credits each, depending on resolution").
 5. **Space fix kept from v1:** images load with `crossOrigin` so the WebGL previs works behind the Hugging Face CDN redirect.
 
+## Changes in v3 (final polish)
+
+1. **Caption sync.** The gallery is now three beats (one per clip), each with its own narration; the capture is cut at the recorded clip changes, so "six out of ten" finishes over the Grok lite alley clip before the cut to the diner.
+2. **9:16 reel label.** The label burned into the vertical reel is now two lines ("REAL: model" / "via platform") at about 1.5x the size, and the reel beat punches in on the vertical player (also a little taller, 430 px).
+3. **Captions** sit on a semi-transparent dark box.
+4. **Gallery description text** is larger in the recording (video-only CSS).
+5. **Coverage beat** is about 1.5 s shorter (shorter narration and waits).
+6. README screenshots and the flow GIF were retaken in the new popup style (webp, small).
+
 ## Deviations from the first plan (1:50, README-first)
 
 * The cut **opens on the real hero clip** (within 5 s) instead of a title card; the build/platform beat and the credit log are cards.
@@ -55,29 +64,33 @@ Never claim: camera-LoRA results (none exist), that the open-weights or Cloud en
 |---|---|---|---|---|
 | 1 | 0:00.0 to 0:05.2 | REAL footage, full frame: `forest-cabin__fpv-drone__router-minimax-h3.mp4` (MiniMax H3 via the Comfy Router, unedited, cropped from 1280x732 to 1280x720 only). Dark label with the clip's facts (model, move, own rating 7/10, 135.78 credits). | One still. One real render. This is Shot Director. (9 words) | Label names model, move, rating, credits, "unedited" |
 | 2 | 0:05.2 to 0:15.0 | Card: still -> free previs (amber, simulated) -> one real render (green). | Shot Director is a camera-move studio for Comfy. Preview any move for free with a simulated camera, then spend credits once, on the real render of the move you picked. (30 words) | Green = real, amber = simulated |
-| 3 | 0:15.0 to 0:30.3 | UI capture, local Demo app, punched in 1.4x: Forest Cabin -> FPV Drone -> Previs this shot (free) -> amber SIMULATED popup and callout -> Play the real render (green REAL popup with model, move, rating 7/10, 136 credits). | Pick a still and a move. The free preview is simulated, and the amber badge says so. Happy with it? Play the real render: green badge, MiniMax H3 through the Comfy Router, a partner model, unedited. A hundred and thirty-six credits. (41 words) | SIMULATED popup, then REAL popup, both on screen |
-| 4 | 0:30.3 to 0:46.0 | UI capture (1.4x): Example outputs gallery; clicks FPV Drone (H3, 7/10), Orbit Left (Grok lite, 6/10) and the FLUX 3 Video arc (4/10). The popup is built from the selected clip's own data (checked in the recording script and by `tests/test_popup_ui.py`). | The gallery holds fourteen real clips, with their credits and my honest ratings. Grok lite costs forty-eight credits and is close behind; its orbit is a gentle arc, six out of ten. FLUX 3 Video cost two hundred and twenty-six, and barely moves: four out of ten. (47 words) | Each popup shows that clip's model, move, rating, credits |
-| 5 | 0:46.0 to 0:53.1 | UI capture (1.4x): Rainy Alley, Get coverage (real FLUX 3 Image board, green), then the A/B split wipe. | Coverage: six real FLUX 3 Image angles of one frame. The A/B player compares the still with the clip. (19 words) | Green board popup; the stage clip keeps its own popup |
-| 6 | 0:53.1 to 1:01.8 | UI capture (1.4x): + All real clips, Make my reel; the 16:9 and 9:16 outputs play. | Make my reel cuts the real clips into sixteen by nine and nine by sixteen, labelled with the model. No credits spent. (22 words) | Real clips only, labelled with the model, no credits |
-| 7 | 1:01.8 to 1:09.2 | UI capture (1.4x) of the live static Space (https://bolttmade-shot-director.static.hf.space/): in-browser WebGL previs (SIMULATED), then Play the real render (REAL popup with the clip's facts). | It also runs free in your browser, as a static Hugging Face Space. (13 words) | SIMULATED and REAL popups |
-| 8 | 1:09.2 to 1:18.2 | Card: four facts: 14 real clips, 4 Router models, 100+ tests and CI green, cap + confirm. | Under the hood: the Comfy Router API and SDK, one capped, confirmed submit per request, a hundred tests, and green CI. (21 words) | No claim beyond what ran |
-| 9 | 1:18.2 to 1:29.1 | Card: credits spent by model (about 1,310 in total, Grok lite clips ~33 to 48 credits each depending on resolution), every request id in docs/COSTS.md. | Every credit is logged with its request id: about thirteen hundred in total. The open-weights and Cloud engines are contract-tested only, and no camera LoRA result exists. (27 words) | Numbers match docs/COSTS.md |
-| 10 | 1:29.1 to 1:35.9 | End card: github.com/bolttmade/shot-director and huggingface.co/spaces/BoltTmade/shot-director. | Shot Director. Open source, on GitHub and Hugging Face. (9 words) | Only the bolt / bolttmade / BoltTmade identity |
+| 3 | 0:15.0 to 0:29.9 | UI capture, local Demo app, punched in 1.4x: Forest Cabin -> FPV Drone -> Previs this shot (free) -> amber SIMULATED popup and callout -> Play the real render (green REAL popup with model, move, rating 7/10, 136 credits). | Pick a still and a move. The free preview is simulated, and the amber badge says so. Happy with it? Play the real render: green badge, MiniMax H3 through the Comfy Router, a partner model, unedited. A hundred and thirty-six credits. (41 words) | SIMULATED popup, then REAL popup, both on screen |
+| 4 | 0:29.9 to 0:36.7 | UI capture (1.4x): Example outputs gallery, clip 1 of 3: FPV Drone (H3, 7/10). The popup is built from the selected clip's own data (checked in the recording script and by `tests/test_popup_ui.py`). | Fourteen real clips, with their credits and my honest ratings. MiniMax H3: seven out of ten. (16 words) | Each popup shows that clip's model, move, rating, credits |
+| 5 | 0:36.7 to 0:43.1 | Same capture, cut at the recorded click: Orbit Left on Rainy Alley (Grok lite, 6/10, 48.3 credits). | Grok lite costs forty-eight credits and is close behind; its orbit is a gentle arc, six out of ten. (19 words) | Popup shows Grok lite facts |
+| 6 | 0:43.1 to 0:48.9 | Same capture, next click: Arc Shot on Retro Diner (FLUX 3 Video, 4/10, 226 credits). | FLUX 3 Video cost two hundred and twenty-six credits, and barely moves: four out of ten. (16 words) | Popup shows FLUX 3 Video facts |
+| 7 | 0:48.9 to 0:54.4 | UI capture (1.4x): Rainy Alley, Get coverage (real FLUX 3 Image board, green), then the A/B split wipe. | Coverage: six real FLUX 3 Image angles of one frame, then an A/B player. (14 words) | Green board popup; the stage clip keeps its own popup |
+| 8 | 0:54.4 to 1:03.0 | UI capture (1.4x): + All real clips, Make my reel; the 16:9 and 9:16 outputs play. | Make my reel cuts the real clips into sixteen by nine and nine by sixteen, labelled with the model. No credits spent. (22 words) | Real clips only, labelled with the model, no credits |
+| 9 | 1:03.0 to 1:10.2 | UI capture (1.4x) of the live static Space (https://bolttmade-shot-director.static.hf.space/): in-browser WebGL previs (SIMULATED), then Play the real render (REAL popup with the clip's facts). | It also runs free in your browser, as a static Hugging Face Space. (13 words) | SIMULATED and REAL popups |
+| 10 | 1:10.2 to 1:18.8 | Card: four facts: 14 real clips, 4 Router models, 100+ tests and CI green, cap + confirm. | Under the hood: the Comfy Router API and SDK, one capped, confirmed submit per request, a hundred tests, and green CI. (21 words) | No claim beyond what ran |
+| 11 | 1:18.8 to 1:29.5 | Card: credits spent by model (about 1,310 in total, Grok lite clips ~33 to 48 credits each depending on resolution), every request id in docs/COSTS.md. | Every credit is logged with its request id: about thirteen hundred in total. The open-weights and Cloud engines are contract-tested only, and no camera LoRA result exists. (27 words) | Numbers match docs/COSTS.md |
+| 12 | 1:29.5 to 1:36.3 | End card: github.com/bolttmade/shot-director and huggingface.co/spaces/BoltTmade/shot-director. | Shot Director. Open source, on GitHub and Hugging Face. (9 words) | Only the bolt / bolttmade / BoltTmade identity |
 
-Total 95.9 s, 238 narrated words. Each beat lasts as long as its narration (plus 0.45 s), a real clip is never shortened, and a short freeze fills a capture that ends early.
+Total 96.3 s, 237 narrated words. Each beat lasts as long as its narration (plus 0.45 s), a real clip is never shortened, and a short freeze fills a capture that ends early.
 
 ## Voice-over script
 
 **1 (0:00.0)** One still. One real render. This is Shot Director.
 **2 (0:05.2)** Shot Director is a camera-move studio for Comfy. Preview any move for free with a simulated camera, then spend credits once, on the real render of the move you picked.
 **3 (0:15.0)** Pick a still and a move. The free preview is simulated, and the amber badge says so. Happy with it? Play the real render: green badge, MiniMax H3 through the Comfy Router, a partner model, unedited. A hundred and thirty-six credits.
-**4 (0:30.3)** The gallery holds fourteen real clips, with their credits and my honest ratings. Grok lite costs forty-eight credits and is close behind; its orbit is a gentle arc, six out of ten. FLUX 3 Video cost two hundred and twenty-six, and barely moves: four out of ten.
-**5 (0:46.0)** Coverage: six real FLUX 3 Image angles of one frame. The A/B player compares the still with the clip.
-**6 (0:53.1)** Make my reel cuts the real clips into sixteen by nine and nine by sixteen, labelled with the model. No credits spent.
-**7 (1:01.8)** It also runs free in your browser, as a static Hugging Face Space.
-**8 (1:09.2)** Under the hood: the Comfy Router API and SDK, one capped, confirmed submit per request, a hundred tests, and green CI.
-**9 (1:18.2)** Every credit is logged with its request id: about thirteen hundred in total. The open-weights and Cloud engines are contract-tested only, and no camera LoRA result exists.
-**10 (1:29.1)** Shot Director. Open source, on GitHub and Hugging Face.
+**4 (0:29.9)** Fourteen real clips, with their credits and my honest ratings. MiniMax H3: seven out of ten.
+**5 (0:36.7)** Grok lite costs forty-eight credits and is close behind; its orbit is a gentle arc, six out of ten.
+**6 (0:43.1)** FLUX 3 Video cost two hundred and twenty-six credits, and barely moves: four out of ten.
+**7 (0:48.9)** Coverage: six real FLUX 3 Image angles of one frame, then an A/B player.
+**8 (0:54.4)** Make my reel cuts the real clips into sixteen by nine and nine by sixteen, labelled with the model. No credits spent.
+**9 (1:03.0)** It also runs free in your browser, as a static Hugging Face Space.
+**10 (1:10.2)** Under the hood: the Comfy Router API and SDK, one capped, confirmed submit per request, a hundred tests, and green CI.
+**11 (1:18.8)** Every credit is logged with its request id: about thirteen hundred in total. The open-weights and Cloud engines are contract-tested only, and no camera LoRA result exists.
+**12 (1:29.5)** Shot Director. Open source, on GitHub and Hugging Face.
 
 Say the credit numbers only if they agree with the repo (H3 135.78, Grok lite 48.28 at 720p, FLUX 3 Video 226.3, coverage 86.9; total about 1,310).
 

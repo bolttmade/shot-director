@@ -48,10 +48,14 @@ BEATS = [
      "text": "Shot Director is a camera-move studio for Comfy. Preview any move for free with a simulated camera, then spend credits once, on the real render of the move you picked."},
     {"id": "previs", "kind": "ui", "cap": "previs",
      "text": "Pick a still and a move. The free preview is simulated, and the amber badge says so. Happy with it? Play the real render: green badge, MiniMax H3 through the Comfy Router, a partner model, unedited. A hundred and thirty-six credits."},
-    {"id": "gallery", "kind": "ui", "cap": "gallery",
-     "text": "The gallery holds fourteen real clips, with their credits and my honest ratings. Grok lite costs forty-eight credits and is close behind; its orbit is a gentle arc, six out of ten. FLUX 3 Video cost two hundred and twenty-six, and barely moves: four out of ten."},
+    {"id": "gallery", "kind": "ui", "cap": "gallery", "slice": 0,
+     "text": "Fourteen real clips, with their credits and my honest ratings. MiniMax H3: seven out of ten."},
+    {"id": "gallery_b", "kind": "ui", "cap": "gallery", "slice": 1,
+     "text": "Grok lite costs forty-eight credits and is close behind; its orbit is a gentle arc, six out of ten."},
+    {"id": "gallery_c", "kind": "ui", "cap": "gallery", "slice": 2,
+     "text": "FLUX 3 Video cost two hundred and twenty-six credits, and barely moves: four out of ten."},
     {"id": "coverage", "kind": "ui", "cap": "coverage",
-     "text": "Coverage: six real FLUX 3 Image angles of one frame. The A/B player compares the still with the clip."},
+     "text": "Coverage: six real FLUX 3 Image angles of one frame, then an A/B player."},
     {"id": "reel", "kind": "ui", "cap": "reel",
      "text": "Make my reel cuts the real clips into sixteen by nine and nine by sixteen, labelled with the model. No credits spent."},
     {"id": "space", "kind": "ui", "cap": "space",
@@ -68,6 +72,11 @@ MAX_SECONDS = 105.0
 
 def run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, check=True, **kw)
+
+
+def narr_seconds(work: Path, b: dict) -> float:
+    wav = work / "tts" / f"{b['id']}.wav"
+    return ffprobe_dur(wav) if wav.exists() else max(2.0, len(b["text"].split()) / 2.6)
 
 
 def ffprobe_dur(p: Path) -> float:
@@ -227,6 +236,9 @@ class PollRecorder:
             self.page.screenshot(path=str(self.dir / name), type="jpeg", quality=90, clip={"x": round(self.cur[0]), "y": round(self.cur[1]), "width": CLIP_W, "height": CLIP_H})
             self.frames.append((t, name))
 
+    def now(self) -> float:
+        return time.time() - self.t0 - self.skipped
+
     def pause(self):
         self.paused_at = time.time()
 
@@ -297,16 +309,25 @@ def capture(work: Path, only: set[str] | None = None) -> None:
                 popup_says(pg, "REAL", "MiniMax H3", "FPV Drone", "Forest Cabin", "own rating 7/10", "136 credits")
                 rec.focus(["#stageTitle", "#simBadge", "#stage"], xmin=372); rec.wait(6500)
                 rec.stop(); ctx.close()
-            # ---- gallery: real clips with their own popups (model, move, rating, credits)
+            # ---- gallery: real clips with their own popups (model, move, rating, credits); each clip is held for its own narration beat
             if want("gallery"):
                 ctx, pg = page_for(base); pg.wait_for_selector(".g-item.is-real")
+                pg.add_style_tag(content=".sim-badge{font-size:16px !important;line-height:1.45 !important}.sim-badge .sb-head{font-size:17px !important}")   # video only: larger description text
                 pg.evaluate("window.scrollTo(0, 430)"); pg.wait_for_timeout(300)
-                rec = PollRecorder(pg, work / "cap_gallery"); rec.focus((366, 40), snap=True); rec.wait(1500)
-                for tile, bits, hold in ((("FPV Drone", "Forest Cabin"), ("REAL", "MiniMax H3", "FPV Drone on Forest Cabin", "own rating 7/10", "136 credits"), 3000),
-                                         (("Orbit Left", "Rainy Alley"), ("REAL", "Grok Imagine 1.5 lite", "Orbit Left on Rainy Alley", "own rating 6/10", "48.3 credits"), 3800),
-                                         (("Arc Shot", "Retro Diner"), ("REAL", "FLUX 3 Video", "Arc Shot on Retro Diner", "own rating 4/10", "226 credits"), 3800)):
+                gb = [b for b in BEATS if b.get("cap") == "gallery"]
+                holds = [narr_seconds(work, b) + PAD_AFTER for b in gb]
+                rec = PollRecorder(pg, work / "cap_gallery"); rec.focus((366, 40), snap=True); marks = [0.0]
+                steps = (((("FPV Drone", "Forest Cabin"), ("REAL", "MiniMax H3", "FPV Drone on Forest Cabin", "own rating 7/10", "136 credits")), max(holds[0] - 1.5, 2.0)),
+                         ((("Orbit Left", "Rainy Alley"), ("REAL", "Grok Imagine 1.5 lite", "Orbit Left on Rainy Alley", "own rating 6/10", "48.3 credits")), holds[1]),
+                         ((("Arc Shot", "Retro Diner"), ("REAL", "FLUX 3 Video", "Arc Shot on Retro Diner", "own rating 4/10", "226 credits")), holds[2]))
+                rec.wait(1500)
+                for k, ((tile, bits), hold) in enumerate(steps):
+                    if k:
+                        marks.append(rec.now())
                     pg.evaluate("(t) => { const el=[...document.querySelectorAll('.g-item.is-real')].find(e => e.textContent.includes(t[0]) && e.textContent.includes(t[1])); el.click(); }", list(tile))
-                    popup_says(pg, *bits); rec.wait(hold)
+                    popup_says(pg, *bits); rec.wait(int(hold * 1000))
+                marks.append(rec.now())
+                (work / "cap_gallery.marks.json").write_text(json.dumps(marks))
                 rec.stop(); ctx.close()
             # ---- coverage + A/B
             if want("coverage"):
@@ -315,8 +336,8 @@ def capture(work: Path, only: set[str] | None = None) -> None:
                 pg.evaluate("window.scrollTo(0, 0)"); pg.wait_for_timeout(1200)
                 rec = PollRecorder(pg, work / "cap_coverage"); rec.focus((366, 40), snap=True); rec.wait(700)
                 pg.click("#getCov"); rec.pause(); pg.wait_for_function("() => document.querySelectorAll('#cov .tile.has').length === 6", timeout=120000); rec.resume()
-                rec.wait(2600)
-                pg.click("#abSeg button[data-view=split]"); pg.fill("#wipe", "30"); rec.wait(900); pg.fill("#wipe", "70"); rec.wait(1500)
+                rec.wait(1500)
+                pg.click("#abSeg button[data-view=split]"); pg.fill("#wipe", "30"); rec.wait(700); pg.fill("#wipe", "70"); rec.wait(1000)
                 rec.stop(); ctx.close()
             # ---- make my reel
             if want("reel"):
@@ -325,8 +346,9 @@ def capture(work: Path, only: set[str] | None = None) -> None:
                 rec = PollRecorder(pg, work / "cap_reel"); rec.focus((366, 300), snap=True); rec.wait(700)
                 pg.click("#addReal"); rec.wait(1500)
                 pg.click("#makeReel"); rec.pause(); pg.wait_for_selector("#reelOut:not(.hidden)", timeout=240000); rec.resume()
-                pg.evaluate("document.querySelector('#reelOut').scrollIntoView({block:'center'})"); rec.focus(["#reelOut"], snap=True); rec.wait(500)
-                pg.evaluate("document.querySelectorAll('#reelOut video').forEach(v => { v.muted = true; v.play().catch(()=>{}); })"); rec.wait(4500)
+                pg.evaluate("document.querySelector('#reelOut').scrollIntoView({block:'center'})"); rec.focus(["#reelOut"], snap=True); rec.wait(900)
+                pg.evaluate("document.querySelectorAll('#reelOut video').forEach(v => { v.muted = true; v.play().catch(()=>{}); })")
+                pg.evaluate("document.querySelector('#reelOut .reel:last-child video').scrollIntoView({block:'center'})"); rec.focus(["#reelOut .reel:last-child video"]); rec.wait(4000)   # punch in on the 9:16 reel and its model label
                 rec.stop(); ctx.close()
             # ---- the live static Space
             if want("space"):
@@ -375,7 +397,7 @@ def assemble(work: Path, final: Path) -> dict:
     ass_events = []
     for b in BEATS:
         wav = work / "tts" / f"{b['id']}.wav"
-        nar = ffprobe_dur(wav) if wav.exists() else max(2.0, len(b["text"].split()) / 2.6)
+        nar = narr_seconds(work, b)
         # visual source
         if b["kind"] == "clip":
             src = ROOT / b["src"]; vis = ffprobe_dur(src)
@@ -383,6 +405,10 @@ def assemble(work: Path, final: Path) -> dict:
             src = work / f"card_{b['card']}.png"; vis = 0.0
         else:
             src = work / f"cap_{b['cap']}.mp4"; vis = ffprobe_dur(src)
+            trim = ""
+            if "slice" in b:   # one capture feeds several beats: cut it at the recorded clip changes so each beat shows its own clip
+                mk = json.loads((work / f"cap_{b['cap']}.marks.json").read_text()); a, z = mk[b["slice"]], (mk[b["slice"] + 1] if b["slice"] + 1 < len(mk) else vis)
+                trim = f"trim=start={a:.3f}:end={z:.3f},setpts=PTS-STARTPTS,"; vis = z - a
         dur = max(nar + PAD_AFTER, vis if b["kind"] == "clip" else 0.0) + b.get("tail", 0.0)
         if b["kind"] == "ui":
             dur = max(dur, min(vis, nar + PAD_AFTER + 3.0))     # let a capture run a little past the narration, but never freeze for long
@@ -393,7 +419,7 @@ def assemble(work: Path, final: Path) -> dict:
         elif b["kind"] == "card":
             run(["ffmpeg", "-y", "-loglevel", "error", "-loop", "1", "-framerate", str(FPS), "-i", str(src), "-t", f"{dur:.3f}", "-vf", f"fps={FPS},format=yuv420p", "-c:v", "libx264", "-crf", "17", "-preset", "fast", str(seg)])
         else:
-            vf = f"tpad=stop_mode=clone:stop_duration={max(dur - vis, 0) + 0.1:.2f},pad={W}:{H}:0:0:black,fps={FPS},format=yuv420p"
+            vf = f"{trim}tpad=stop_mode=clone:stop_duration={max(dur - vis, 0) + 0.1:.2f},pad={W}:{H}:0:0:black,fps={FPS},format=yuv420p"
             run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-an", "-vf", vf, "-t", f"{dur:.3f}", "-c:v", "libx264", "-crf", "17", "-preset", "fast", str(seg)])
         segs.append(seg)
         # captions: split the narration over the narration time, weighted by characters
@@ -419,7 +445,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,DejaVu Sans,29,&H00FFFFFF,&H000000FF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,40,40,16,1
+Style: Cap,DejaVu Sans,29,&H00FFFFFF,&H000000FF,&H70101010,&H70101010,0,0,0,0,100,100,0,0,3,9,0,2,40,40,18,1
 Style: Real,DejaVu Sans,30,&H00FFFFFF,&H000000FF,&H00180F0C,&H00180F0C,1,0,0,0,100,100,0,0,3,10,0,7,24,24,22,1
 Style: Sim,DejaVu Sans,30,&H00FFFFFF,&H000000FF,&H00180F0C,&H00180F0C,1,0,0,0,100,100,0,0,3,10,0,7,24,24,22,1
 

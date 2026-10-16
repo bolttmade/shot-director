@@ -30,9 +30,17 @@ def _norm_chain(i: int, width: int, height: int, fps: int, label: str | None, ve
     else:
         chain = f"[{i}:v]scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,fps={fps}"
     if label:
-        size = max(18, height // (46 if vertical else 36))
-        y = f"h-th-{int(height * (0.1 if vertical else 0.04))}"
-        chain += f",drawtext=text='{_esc(label)}':x=(w-text_w)/2:y={y}:fontsize={size}:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=10" if vertical else f",drawtext=text='{_esc(label)}':x=24:y={y}:fontsize={size}:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=10"
+        if vertical:
+            # two lines ("REAL: model" / "via platform") so the label can be big on a 720 px wide frame
+            label = label.replace(" via ", "\nvia ", 1)
+            longest = max(len(x) for x in label.split("\n"))
+            size = max(18, min(height // 30, int(0.88 * width / (0.62 * longest))))
+            y = f"h-th-{int(height * 0.16)}"
+            chain += f",drawtext=text='{_esc(label)}':x=(w-text_w)/2:y={y}:fontsize={size}:fontcolor=white:line_spacing=6:box=1:boxcolor=black@0.7:boxborderw=12"
+        else:
+            size = max(18, height // 36)
+            y = f"h-th-{int(height * 0.04)}"
+            chain += f",drawtext=text='{_esc(label)}':x=24:y={y}:fontsize={size}:fontcolor=white:box=1:boxcolor=black@0.6:boxborderw=10"
     return chain + f",format=yuv420p[v{i}]"
 
 

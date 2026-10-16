@@ -34,6 +34,7 @@ def test_reel_aspects_and_labels():
     v = build_command(clips, [5.0, 5.0], Path("o.mp4"), crossfade=0.4, aspect="9:16", labels=["REAL: MiniMax H3 via Comfy Router", "SIMULATED previs"])
     g = _g(v)
     assert "720:1280" in g and "boxblur" in g and g.count("drawtext") == 2 and "overlay" in g
+    assert "\nvia Comfy Router" in g and "fontsize=" in g   # the vertical label is split over two lines so it can be large
     h = build_command(clips, [5.0, 5.0], Path("o.mp4"), aspect="16:9", labels=["a", "b"])
     assert "1280:720" in _g(h) and _g(h).count("drawtext") == 2 and "concat=n=2" in _g(h)
     assert "drawtext" not in _g(build_command(clips, [5.0, 5.0], Path("o.mp4"), aspect="16:9"))

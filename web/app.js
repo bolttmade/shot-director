@@ -386,7 +386,7 @@ async function makeReel() {
     const r = await api("/api/reel", { json: { clips: S.timeline.map(c => c.url), crossfade: $("#xfade").checked ? 0.4 : 0, aspects: ["16:9", "9:16"] } });
     const out = $("#reelOut"); out.replaceChildren();
     for (const reel of r.reels) {
-      out.append(h("div", { class: "reel" }, h("video", { src: reel.url, controls: true, loop: true, muted: true, playsinline: true, style: reel.aspect === "9:16" ? "max-height:340px;aspect-ratio:9/16" : "" }),
+      out.append(h("div", { class: "reel" }, h("video", { src: reel.url, controls: true, loop: true, muted: true, playsinline: true, style: reel.aspect === "9:16" ? "max-height:430px;aspect-ratio:9/16" : "" }),
         h("div", { class: "row" }, h("span", { class: "hint" }, `${reel.aspect}`), h("a", { class: "btn btn-sm", href: reel.url, download: `reel-${reel.aspect.replace(":", "x")}.mp4` }, "Download mp4"), h("a", { class: "btn btn-sm", href: reel.recipe_url, download: "" }, "recipe.json"))));
     }
     out.classList.remove("hidden");

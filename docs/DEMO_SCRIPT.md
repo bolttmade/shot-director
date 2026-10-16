@@ -16,7 +16,7 @@
 
 ## Storyboard
 
-See [DEMO_VIDEO_PLAN.md](DEMO_VIDEO_PLAN.md#as-built-shot-list) (ten beats, about 240 spoken words, built by `scripts/make_demo_video.sh`). Summary: real hero clip first, concept, free previs then the real render, gallery comparison across models, real FLUX 3 coverage with A/B, Make my reel, the Space, the platform facts, the credit log and the end card. The captions-only file is the primary cut (the piper voice's data licence is research-only, see the plan).
+See [DEMO_VIDEO_PLAN.md](DEMO_VIDEO_PLAN.md#as-built-shot-list) (twelve beats, about 235 spoken words, built by `scripts/make_demo_video.sh`). Summary: real hero clip first, concept, free previs then the real render, gallery comparison across models, real FLUX 3 coverage with A/B, Make my reel, the Space, the platform facts, the credit log and the end card. The captions-only file is the primary cut (the piper voice's data licence is research-only, see the plan).
 
 ## What not to say
 
